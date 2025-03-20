@@ -1,11 +1,14 @@
 {
     "name": "hello_world",
     "version": "1.0.0",
-    "description": "Hello world in Node.js",
-    "main": "index.js",
+    "description": "Hello world in Node.js using Express.js framework",
+    "main": "server.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "hxu",
-    "license": "MIT"
+    "license": "MIT",
+    "dependencies": {
+        "express": "^4.18.2"
+    }
 }
