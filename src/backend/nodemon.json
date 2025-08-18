@@ -1,6 +1,0 @@
-{
-  "watch": ["src/backend"],
-  "ext": "js,json",
-  "ignore": ["src/backend/__tests__/**"],
-  "exec": "node src/backend/index.js"
-}
