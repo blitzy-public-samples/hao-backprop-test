@@ -1,6 +1,6 @@
 # Node.js Hello World Backend
 
-Backend implementation of a simple Node.js HTTP server that exposes a single REST endpoint `/hello` which returns "Hello world" to clients.
+Backend implementation of a simple Node.js HTTP server that exposes REST endpoints `/hello` which returns "Hello world" to clients and `/health` for server health checks.
 
 ## Overview
 
@@ -8,7 +8,8 @@ This directory contains the backend implementation of the Node.js Hello World ap
 
 Key features:
 - Pure Node.js implementation using only core modules
-- Single `/hello` endpoint with proper HTTP method validation
+- `/hello` endpoint with proper HTTP method validation
+- `/health` endpoint for server health checks
 - Structured, modular codebase with separation of concerns
 - Comprehensive error handling and logging
 - Environment-based configuration
@@ -30,11 +31,14 @@ The backend follows a modular architecture with clear separation of concerns:
 graph TD
     A[index.js] --> B[server.js]
     B --> C[router.js]
-    C --> D[handlers/helloHandler.js]
+    C --> D1[handlers/helloHandler.js]
+    C --> D2[handlers/healthHandler.js]
     B --> E[errorHandler.js]
     B --> F[config.js]
-    D --> G[utils/constants.js]
-    D --> H[utils/logger.js]
+    D1 --> G[utils/constants.js]
+    D1 --> H[utils/logger.js]
+    D2 --> G
+    D2 --> H
     E --> G
     E --> H
 ```
@@ -51,13 +55,15 @@ graph TD
 │   ├── config.test.js   # Configuration tests
 │   ├── errorHandler.test.js
 │   ├── handlers/        # Handler tests
-│   │   └── helloHandler.test.js
+│   │   ├── helloHandler.test.js
+│   │   └── healthHandler.test.js
 │   ├── index.test.js    # Entry point tests
 │   ├── router.test.js   # Router tests
 │   ├── server.test.js   # Server tests
 │   └── setup.js         # Test setup file
 ├── handlers/            # Request handlers
-│   └── helloHandler.js  # /hello endpoint handler
+│   ├── helloHandler.js  # /hello endpoint handler
+│   └── healthHandler.js # /health endpoint handler
 ├── utils/               # Utility modules
 │   ├── constants.js     # Application constants
 │   └── logger.js        # Logging functionality
@@ -171,6 +177,32 @@ Expected response:
 ```
 Hello world
 ```
+
+### GET /health
+
+Returns an empty response to indicate server health status.
+
+**Request:**
+- Method: GET
+- Path: `/health`
+- Headers: None required
+- Body: None
+
+**Response:**
+- Status: 200 OK
+- Content-Type: text/plain
+- Body: (empty)
+
+**Error Responses:**
+- 405 Method Not Allowed: If any HTTP method other than GET is used
+
+**Example:**
+
+```bash
+curl http://localhost:3000/health
+```
+
+Expected response: (empty)
 
 ## Development
 
@@ -299,6 +331,11 @@ Log format includes timestamp, log level, and contextual information.
 - Processes requests to the `/hello` endpoint
 - Validates HTTP method (accepts GET, rejects others)
 - Returns "Hello world" with appropriate headers
+
+#### Health Handler (`handlers/healthHandler.js`)
+- Processes requests to the `/health` endpoint
+- Validates HTTP method (accepts GET, rejects others)
+- Returns empty response with 200 OK status for health checks
 
 #### Configuration (`config.js`)
 - Reads environment variables using `dotenv`
