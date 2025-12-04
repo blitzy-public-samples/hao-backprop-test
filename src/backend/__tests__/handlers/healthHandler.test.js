@@ -83,8 +83,8 @@ describe('handleHealthRequest', () => {
     expect(handle405).not.toHaveBeenCalled();
   });
   
-  // Test case for non-GET requests (POST)
-  it('should call handle405 for POST requests', () => {
+  // Test case for non-GET requests
+  it('should call handle405 for non-GET requests', () => {
     // Set request method to POST
     req.method = 'POST';
     
