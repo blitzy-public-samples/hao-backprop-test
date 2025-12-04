@@ -2,7 +2,7 @@
 #
 # health-check.sh
 # A shell script that checks the health status of the Node.js Hello World application
-# by verifying the server is running and responding correctly to requests.
+# by verifying the server is running and responding correctly to the /health endpoint.
 #
 
 # Global variables
@@ -11,8 +11,8 @@ PROJECT_ROOT=$(realpath "$SCRIPT_DIR/../..")
 BACKEND_DIR=$PROJECT_ROOT/src/backend
 DEFAULT_PORT=3000
 DEFAULT_HOST="localhost"
-DEFAULT_ENDPOINT="/hello"
-DEFAULT_EXPECTED_RESPONSE="Hello world"
+DEFAULT_ENDPOINT="/health"
+DEFAULT_EXPECTED_RESPONSE=""
 DEFAULT_TIMEOUT=5
 PID_FILE=$PROJECT_ROOT/logs/server.pid
 
@@ -42,7 +42,7 @@ print_usage() {
     echo "Examples:"
     echo "  $(basename $0)"
     echo "  $(basename $0) -p 8080"
-    echo "  $(basename $0) -h 127.0.0.1 -p 3000 -e /hello"
+    echo "  $(basename $0) -h 127.0.0.1 -p 3000 -e /health"
     echo "  $(basename $0) -t 10 -v"
     echo
 }
