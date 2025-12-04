@@ -26,7 +26,7 @@ describe('route', () => {
     // Setup fresh mocks before each test
     req = {
       url: '/hello',
-      method: 'GET'
+      method: 'GET',
     };
     res = {};
     
@@ -49,8 +49,8 @@ describe('route', () => {
     // Verify the logger was called with the request
     expect(logger.request).toHaveBeenCalledWith(req);
     
-    // Verify debugging information was logged
-    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('/hello'));
+    // Verify routing information was logged
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('/hello'));
     
     // Verify the correct handler was called
     expect(handleHelloRequest).toHaveBeenCalledWith(req, res);
@@ -69,8 +69,8 @@ describe('route', () => {
     // Verify the logger was called with the request
     expect(logger.request).toHaveBeenCalledWith(req);
     
-    // Verify debugging information was logged
-    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('/undefined'));
+    // Verify routing information was logged
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('/undefined'));
     
     // Verify the 404 handler was called
     expect(handle404).toHaveBeenCalledWith(res);
@@ -86,8 +86,8 @@ describe('route', () => {
     // Call the route function
     route(req, res);
     
-    // Verify debugging information contains only the path (not query params)
-    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('/hello'));
+    // Verify routing information contains only the path (not query params)
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('/hello'));
     
     // Verify the correct handler was called based on the parsed path
     expect(handleHelloRequest).toHaveBeenCalledWith(req, res);
@@ -104,7 +104,7 @@ describe('route', () => {
     route(req, res);
     
     // Verify fallback behavior for parsing errors
-    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('/'));
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('/'));
     expect(handle404).toHaveBeenCalledWith(res);
     expect(handleHelloRequest).not.toHaveBeenCalled();
   });
