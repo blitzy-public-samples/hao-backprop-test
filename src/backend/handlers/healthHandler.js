@@ -45,7 +45,7 @@ function handleHealthRequest(req, res) {
     res.end('');
     
     // Log the successful response
-    logger.info(`Successfully responded with ${HTTP_STATUS.OK} OK for health check`);
+    logger.info(`Successfully responded with ${HTTP_STATUS.OK} OK`);
   } else {
     // For non-GET requests, handle Method Not Allowed
     logger.error(`Received unsupported ${method} method, expected ${HTTP_METHODS.GET}`);
@@ -55,5 +55,5 @@ function handleHealthRequest(req, res) {
 
 // Export the health endpoint handler function
 module.exports = {
-  handleHealthRequest,
+  handleHealthRequest
 };
