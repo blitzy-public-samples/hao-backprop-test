@@ -8,12 +8,14 @@ const route = require('../router');
 
 // Import handlers and utilities used by the router
 const { handleHelloRequest } = require('../handlers/helloHandler');
+const { handleHealthRequest } = require('../handlers/healthHandler');
 const { handle404 } = require('../errorHandler');
 const { ROUTES } = require('../utils/constants');
 const logger = require('../utils/logger');
 
 // Mock dependencies
 jest.mock('../handlers/helloHandler');
+jest.mock('../handlers/healthHandler');
 jest.mock('../errorHandler');
 jest.mock('../utils/logger');
 
@@ -128,5 +130,65 @@ describe('route', () => {
     req.url = '/notdefined';
     route(req, res);
     expect(handle404).toHaveBeenCalled();
+  });
+
+  it('should route to handleHealthRequest for /health path', () => {
+    // Set request URL to /health
+    req.url = '/health';
+    
+    // Call the route function
+    route(req, res);
+    
+    // Verify the logger was called with the request
+    expect(logger.request).toHaveBeenCalledWith(req);
+    
+    // Verify routing information was logged
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('/health'));
+    
+    // Verify the correct handler was called
+    expect(handleHealthRequest).toHaveBeenCalledWith(req, res);
+    
+    // Verify other handlers were not called
+    expect(handleHelloRequest).not.toHaveBeenCalled();
+    expect(handle404).not.toHaveBeenCalled();
+  });
+
+  it('should route to handleHealthRequest for /health/ path with trailing slash', () => {
+    // Set request URL to /health/
+    req.url = '/health/';
+    
+    // Call the route function
+    route(req, res);
+    
+    // Verify the correct handler was called
+    expect(handleHealthRequest).toHaveBeenCalledWith(req, res);
+    
+    // Verify other handlers were not called
+    expect(handleHelloRequest).not.toHaveBeenCalled();
+    expect(handle404).not.toHaveBeenCalled();
+  });
+
+  it('should route to handleHealthRequest for /health with query parameters', () => {
+    // Set request URL with query parameters
+    req.url = '/health?param=value';
+    
+    // Call the route function
+    route(req, res);
+    
+    // Verify the correct handler was called based on the parsed path
+    expect(handleHealthRequest).toHaveBeenCalledWith(req, res);
+    
+    // Verify other handlers were not called
+    expect(handleHelloRequest).not.toHaveBeenCalled();
+    expect(handle404).not.toHaveBeenCalled();
+  });
+
+  it('should correctly match health route using ROUTES constant', () => {
+    // Test the /health route using the ROUTES constant
+    req.url = ROUTES.HEALTH;
+    route(req, res);
+    expect(handleHealthRequest).toHaveBeenCalled();
+    expect(handleHelloRequest).not.toHaveBeenCalled();
+    expect(handle404).not.toHaveBeenCalled();
   });
 });

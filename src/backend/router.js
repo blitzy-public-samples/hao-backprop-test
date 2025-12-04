@@ -11,6 +11,7 @@ const url = require('url'); // built-in
 
 // Import application modules
 const { handleHelloRequest } = require('./handlers/helloHandler');
+const { handleHealthRequest } = require('./handlers/healthHandler');
 const { handle404 } = require('./errorHandler');
 const { ROUTES } = require('./utils/constants');
 const logger = require('./utils/logger');
@@ -29,6 +30,11 @@ function matchRoute(path) {
   // Check if the path matches the hello endpoint
   if (normalizedPath === ROUTES.HELLO) {
     return handleHelloRequest;
+  }
+  
+  // Check if the path matches the health endpoint
+  if (normalizedPath === ROUTES.HEALTH) {
+    return handleHealthRequest;
   }
   
   // No match found
