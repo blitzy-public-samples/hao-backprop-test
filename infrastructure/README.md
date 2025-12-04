@@ -142,10 +142,10 @@ Automates the initial setup process for the application.
 
 ### health-check.sh
 
-Verifies that the server is running correctly by testing the `/hello` endpoint.
+Verifies that the server is running correctly by testing a health endpoint. Defaults to `/health` for the dedicated health check endpoint.
 
 **Functions:**
-- Makes HTTP requests to the /hello endpoint
+- Makes HTTP requests to the health endpoint (defaults to /health)
 - Verifies the response status code and content
 - Supports configurable retries and intervals
 - Can be used in monitoring systems
@@ -205,6 +205,8 @@ For local development with Docker, a Docker Compose configuration is provided in
 - Health checking integration
 - Network configuration for multi-container setups (if needed in the future)
 
+> **Note:** The Docker Compose health check uses the dedicated `/health` endpoint for container health verification.
+
 **Usage:**
 ```bash
 # From infrastructure/local directory
@@ -230,6 +232,21 @@ For this simple application, monitoring can be:
 - Monitoring of process exit codes to detect failures
 
 For production use, additional monitoring would be required but is beyond the scope of this educational example.
+
+### Health Check Endpoints
+
+The application provides dedicated endpoints for health verification:
+
+| Endpoint | Response | Purpose |
+|----------|----------|---------|
+| `/health` | 200 OK (empty body) | Recommended for health checks - optimized for health verification with minimal overhead |
+| `/hello` | 200 OK with "Hello world" | Primary application endpoint - can be used for health checks but `/health` is semantically appropriate |
+
+**Best Practices:**
+- Use `/health` for container health checks (Docker, Kubernetes)
+- Use `/health` for load balancer health verification
+- Use `/health` for monitoring systems and uptime checks
+- The `/health` endpoint returns an empty body, making it efficient for frequent polling
 
 ### Troubleshooting
 
