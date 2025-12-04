@@ -21,7 +21,7 @@ const HTTP_STATUS = {
   /** HTTP 405 Method Not Allowed */
   METHOD_NOT_ALLOWED: 405,
   /** HTTP 500 Internal Server Error */
-  INTERNAL_SERVER_ERROR: 500
+  INTERNAL_SERVER_ERROR: 500,
 };
 
 /**
@@ -31,7 +31,7 @@ const ROUTES = {
   /** Hello endpoint route */
   HELLO: '/hello',
   /** Health check endpoint route */
-  HEALTH: '/health'
+  HEALTH: '/health',
 };
 
 /**
@@ -41,7 +41,7 @@ const CONFIG = {
   /** Default server port when not specified in environment */
   DEFAULT_PORT: 3000,
   /** Environment variable name for port configuration */
-  ENV_VAR_PORT: 'PORT'
+  ENV_VAR_PORT: 'PORT',
 };
 
 /**
@@ -57,7 +57,7 @@ const MESSAGES = {
   /** Message for 500 Internal Server Error responses */
   SERVER_ERROR: 'Internal Server Error',
   /** Server startup message (format with port number) */
-  SERVER_STARTED: 'Server started on port %d'
+  SERVER_STARTED: 'Server started on port %d',
 };
 
 /**
@@ -69,7 +69,7 @@ const HEADERS = {
   /** Content-Type value for plain text responses */
   CONTENT_TYPE_TEXT: 'text/plain',
   /** Allow header for Method Not Allowed responses */
-  ALLOW: 'Allow'
+  ALLOW: 'Allow',
 };
 
 /**
@@ -77,7 +77,7 @@ const HEADERS = {
  */
 const HTTP_METHODS = {
   /** GET method */
-  GET: 'GET'
+  GET: 'GET',
 };
 
 // Export all constants for use throughout the application
@@ -87,5 +87,5 @@ module.exports = {
   CONFIG,
   MESSAGES,
   HEADERS,
-  HTTP_METHODS
+  HTTP_METHODS,
 };
