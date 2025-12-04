@@ -126,6 +126,18 @@ describe('route', () => {
     expect(handleHelloRequest).toHaveBeenCalled();
     jest.clearAllMocks();
     
+    // Test the /health route
+    req.url = ROUTES.HEALTH;
+    route(req, res);
+    expect(handleHealthRequest).toHaveBeenCalled();
+    jest.clearAllMocks();
+    
+    // Test /health with trailing slash (which should be normalized)
+    req.url = ROUTES.HEALTH + '/';
+    route(req, res);
+    expect(handleHealthRequest).toHaveBeenCalled();
+    jest.clearAllMocks();
+    
     // Test an undefined route
     req.url = '/notdefined';
     route(req, res);
