@@ -44,11 +44,14 @@ function route(req, res) {
   // Log the incoming request
   logger.request(req);
   
-  // Parse the URL from the request
-  const parsedUrl = url.parse(req.url);
-  
-  // Extract the pathname from the parsed URL
-  const pathname = parsedUrl.pathname;
+  // Parse the URL from the request, handling undefined/null URLs gracefully
+  let pathname = '/';
+  try {
+    const parsedUrl = url.parse(req.url || '/');
+    pathname = parsedUrl.pathname || '/';
+  } catch (error) {
+    logger.error(`URL parsing error: ${error.message}`);
+  }
   
   // Find the matching route handler
   const handler = matchRoute(pathname);
