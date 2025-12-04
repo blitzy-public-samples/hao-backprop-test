@@ -13,7 +13,7 @@ const {
   HTTP_STATUS,
   MESSAGES,
   HEADERS,
-  HTTP_METHODS
+  HTTP_METHODS,
 } = require('../../utils/constants');
 
 // Import error handler for mocking
@@ -24,13 +24,13 @@ const logger = require('../../utils/logger');
 
 // Mock the error handler module
 jest.mock('../../errorHandler', () => ({
-  handle405: jest.fn()
+  handle405: jest.fn(),
 }));
 
 // Mock the logger module
 jest.mock('../../utils/logger', () => ({
   info: jest.fn(),
-  error: jest.fn()
+  error: jest.fn(),
 }));
 
 describe('handleHelloRequest', () => {
@@ -42,14 +42,14 @@ describe('handleHelloRequest', () => {
   beforeEach(() => {
     // Create mock request object
     req = {
-      method: 'GET' // Default to GET method
+      method: 'GET', // Default to GET method
     };
     
     // Create mock response object with Jest mock functions
     res = {
       statusCode: null,
       setHeader: jest.fn().mockReturnThis(),
-      end: jest.fn()
+      end: jest.fn(),
     };
   });
   
@@ -70,7 +70,7 @@ describe('handleHelloRequest', () => {
     // Verify Content-Type header was set correctly
     expect(res.setHeader).toHaveBeenCalledWith(
       HEADERS.CONTENT_TYPE, 
-      HEADERS.CONTENT_TYPE_TEXT
+      HEADERS.CONTENT_TYPE_TEXT,
     );
     
     // Verify response body was set to "Hello world"

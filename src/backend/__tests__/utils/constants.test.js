@@ -13,7 +13,7 @@ const {
   CONFIG,
   MESSAGES,
   HEADERS,
-  HTTP_METHODS
+  HTTP_METHODS,
 } = require('../../utils/constants');
 
 /**

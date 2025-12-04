@@ -16,7 +16,7 @@ const logger = require('../utils/logger');
 // Mock the logger module
 jest.mock('../utils/logger', () => ({
   error: jest.fn(),
-  info: jest.fn()
+  info: jest.fn(),
 }));
 
 /**
@@ -28,7 +28,7 @@ function createMockResponse() {
     statusCode: 200,
     setHeader: jest.fn().mockReturnThis(),
     end: jest.fn().mockReturnThis(),
-    headersSent: false
+    headersSent: false,
   };
 }
 
@@ -117,7 +117,7 @@ describe('Error Handler', () => {
       
       // Verify logger.error was called with additional message about critical error
       expect(logger.error).toHaveBeenCalledWith(
-        'Port is already in use. Please use a different port or ensure no other service is using this port.'
+        'Port is already in use. Please use a different port or ensure no other service is using this port.',
       );
     });
   });

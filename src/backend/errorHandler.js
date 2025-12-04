@@ -61,7 +61,7 @@ function handle404(res) {
   res.end(MESSAGES.NOT_FOUND);
   
   // Log the 404 response
-  logger.info(`Responding with 404 Not Found`);
+  logger.info('Responding with 404 Not Found');
 }
 
 /**
@@ -79,7 +79,7 @@ function handle405(res) {
   res.end(MESSAGES.METHOD_NOT_ALLOWED);
   
   // Log the 405 response
-  logger.info(`Responding with 405 Method Not Allowed`);
+  logger.info('Responding with 405 Method Not Allowed');
 }
 
 // Export the error handling functions
@@ -87,5 +87,5 @@ module.exports = {
   handleRequestError,
   handleServerError,
   handle404,
-  handle405
+  handle405,
 };

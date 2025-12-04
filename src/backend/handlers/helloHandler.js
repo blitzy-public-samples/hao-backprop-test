@@ -55,5 +55,5 @@ function handleHelloRequest(req, res) {
 
 // Export the hello endpoint handler function
 module.exports = {
-  handleHelloRequest
+  handleHelloRequest,
 };
