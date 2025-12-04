@@ -1,6 +1,6 @@
 /**
  * Logger utility for the Node.js Hello World server application.
- * Provides standardized logging functionality with different log levels 
+ * Provides standardized logging functionality with different log levels
  * and specialized logging for HTTP requests and responses.
  */
 
@@ -37,7 +37,7 @@ function info(message) {
 function error(error) {
   const errorMessage = error instanceof Error ? error.message : error;
   console.error(formatLogMessage('ERROR', errorMessage));
-  
+
   // If an Error object with stack trace was provided, log the stack separately
   if (error instanceof Error && error.stack) {
     console.error(error.stack);
@@ -92,7 +92,7 @@ const logger = {
   warn,
   debug,
   request,
-  response
+  response,
 };
 
 module.exports = logger;
