@@ -29,7 +29,9 @@ const HTTP_STATUS = {
  */
 const ROUTES = {
   /** Hello endpoint route */
-  HELLO: '/hello'
+  HELLO: '/hello',
+  /** Health check endpoint route */
+  HEALTH: '/health'
 };
 
 /**
