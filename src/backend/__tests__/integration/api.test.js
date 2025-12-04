@@ -7,7 +7,6 @@
  */
 
 const request = require('supertest'); // v6.3.3
-const { server } = require('../../index');
 const { startServer, stopServer } = require('../../server');
 const { HTTP_STATUS, MESSAGES, ROUTES } = require('../../utils/constants');
 const getConfig = require('../../config'); // Default import
