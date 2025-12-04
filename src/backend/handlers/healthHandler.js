@@ -55,5 +55,5 @@ function handleHealthRequest(req, res) {
 
 // Export the health endpoint handler function
 module.exports = {
-  handleHealthRequest
+  handleHealthRequest,
 };

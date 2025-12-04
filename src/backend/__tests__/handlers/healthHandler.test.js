@@ -77,7 +77,7 @@ describe('handleHealthRequest', () => {
     
     // Verify logger.info was called with appropriate messages
     expect(logger.info).toHaveBeenNthCalledWith(1, 'Handling GET request to /health endpoint');
-    expect(logger.info).toHaveBeenNthCalledWith(2, `Successfully responded with ${HTTP_STATUS.OK} OK for health check`);
+    expect(logger.info).toHaveBeenNthCalledWith(2, `Successfully responded with ${HTTP_STATUS.OK} OK`);
     
     // Verify handle405 was not called
     expect(handle405).not.toHaveBeenCalled();
