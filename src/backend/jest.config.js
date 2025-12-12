@@ -24,7 +24,9 @@ module.exports = {
     '!**/__tests__/**',
     '!**/node_modules/**',
     '!**/coverage/**',
-    '!jest.config.js'
+    '!jest.config.js',
+    '!.eslintrc.js',
+    '!.prettierrc',
   ],
   
   // Minimum coverage thresholds to enforce as per specifications
@@ -33,8 +35,8 @@ module.exports = {
       statements: 90,
       branches: 85,
       functions: 95,
-      lines: 90
-    }
+      lines: 90,
+    },
   },
   
   // Coverage report formats: text summary in console, lcov for CI tools, and HTML for detailed reports
@@ -53,5 +55,5 @@ module.exports = {
   restoreMocks: true,
   
   // Display individual test results with the test suite hierarchy
-  verbose: true
+  verbose: true,
 };

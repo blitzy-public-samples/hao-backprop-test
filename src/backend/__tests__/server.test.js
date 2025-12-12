@@ -10,7 +10,7 @@ const { createServer, startServer, stopServer, setupGracefulShutdown } = require
 const http = require('http'); // built-in
 const route = require('../router');
 const getConfig = require('../config');
-const { handleServerError, handleRequestError } = require('../errorHandler');
+const { handleRequestError } = require('../errorHandler');
 const logger = require('../utils/logger');
 const { MESSAGES } = require('../utils/constants');
 
@@ -22,8 +22,8 @@ jest.mock('../errorHandler');
 jest.mock('../utils/logger');
 jest.mock('../utils/constants', () => ({
   MESSAGES: {
-    SERVER_STARTED: 'Server started on port %d'
-  }
+    SERVER_STARTED: 'Server started on port %d',
+  },
 }));
 
 describe('createServer', () => {
@@ -34,21 +34,21 @@ describe('createServer', () => {
     mockServer = {
       on: jest.fn().mockReturnThis(),
       listen: jest.fn((port, callback) => {
-        if (callback) callback();
+        if (callback) {callback();}
         return mockServer;
       }),
       close: jest.fn((callback) => {
-        if (callback) callback();
+        if (callback) {callback();}
         return mockServer;
       }),
-      listening: true
+      listening: true,
     };
     
     // Mock http.createServer to return our mock server
     http.createServer.mockReturnValue(mockServer);
     
     // Mock other dependencies
-    route.mockImplementation((req, res) => {});
+    route.mockImplementation((_req, _res) => {});
     getConfig.mockReturnValue({ port: 3000 });
     
     // Clear all previous mock calls
@@ -122,10 +122,10 @@ describe('startServer', () => {
     // Create a mock server object
     mockServer = {
       listen: jest.fn((port, callback) => {
-        if (callback) callback();
+        if (callback) {callback();}
         return mockServer;
       }),
-      once: jest.fn()
+      once: jest.fn(),
     };
     
     // Mock getConfig to return a specific port
@@ -153,10 +153,16 @@ describe('startServer', () => {
     // Create test error
     const testError = new Error('Test startup error');
     
+    // Configure server.listen to NOT call callback (simulating error before listen succeeds)
+    mockServer.listen.mockImplementation(() => {
+      return mockServer;
+    });
+    
     // Configure server.once to trigger the error handler
     mockServer.once.mockImplementation((event, handler) => {
       if (event === 'error') {
-        handler(testError);
+        // Simulate error being triggered after once is registered
+        setImmediate(() => handler(testError));
       }
       return mockServer;
     });
@@ -176,10 +182,10 @@ describe('stopServer', () => {
     // Create a mock server object
     mockServer = {
       close: jest.fn((callback) => {
-        if (callback) callback();
+        if (callback) {callback();}
         return mockServer;
       }),
-      listening: true
+      listening: true,
     };
     
     // Clear all previous mock calls
@@ -230,7 +236,7 @@ describe('setupGracefulShutdown', () => {
   let mockServer;
   let originalProcessOn;
   let originalProcessExit;
-  let signalHandlers = {};
+  const signalHandlers = {};
   
   beforeEach(() => {
     // Save original process.on and process.exit
@@ -273,7 +279,7 @@ describe('setupGracefulShutdown', () => {
     
     // Create a local copy of the module with mocked stopServer
     const localModule = {
-      stopServer: mockStopServer
+      stopServer: mockStopServer,
     };
     
     // Define a local setupGracefulShutdown that uses our mocked stopServer

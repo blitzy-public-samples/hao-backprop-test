@@ -1,17 +1,16 @@
 /**
- * Unit tests for the Hello Endpoint Handler
+ * Unit tests for the Health Endpoint Handler
  * 
- * Tests verify that the handler correctly processes GET requests with 'Hello world' responses
+ * Tests verify that the handler correctly processes GET requests with empty body responses
  * and rejects non-GET methods with 405 Method Not Allowed responses.
  */
 
 // Import the handler function to test
-const { handleHelloRequest } = require('../../handlers/helloHandler');
+const { handleHealthRequest } = require('../../handlers/healthHandler');
 
 // Import constants for assertions
 const { 
   HTTP_STATUS,
-  MESSAGES,
   HEADERS,
   HTTP_METHODS,
 } = require('../../utils/constants');
@@ -33,7 +32,7 @@ jest.mock('../../utils/logger', () => ({
   error: jest.fn(),
 }));
 
-describe('handleHelloRequest', () => {
+describe('handleHealthRequest', () => {
   // Define mock objects
   let req;
   let res;
@@ -60,9 +59,9 @@ describe('handleHelloRequest', () => {
   });
 
   // Test case for GET requests
-  it("should return 200 OK with 'Hello world' for GET requests", () => {
+  it('should return 200 OK with empty body for GET requests', () => {
     // Call the handler with mock request and response
-    handleHelloRequest(req, res);
+    handleHealthRequest(req, res);
     
     // Verify response status code was set to 200 OK
     expect(res.statusCode).toBe(HTTP_STATUS.OK);
@@ -73,12 +72,12 @@ describe('handleHelloRequest', () => {
       HEADERS.CONTENT_TYPE_TEXT,
     );
     
-    // Verify response body was set to "Hello world"
-    expect(res.end).toHaveBeenCalledWith(MESSAGES.HELLO_RESPONSE);
+    // Verify response body was set to empty string
+    expect(res.end).toHaveBeenCalledWith('');
     
     // Verify logger.info was called with appropriate messages
-    expect(logger.info).toHaveBeenNthCalledWith(1, 'Handling GET request to /hello endpoint');
-    expect(logger.info).toHaveBeenNthCalledWith(2, `Successfully responded with ${HTTP_STATUS.OK} OK and "${MESSAGES.HELLO_RESPONSE}" message`);
+    expect(logger.info).toHaveBeenNthCalledWith(1, 'Handling GET request to /health endpoint');
+    expect(logger.info).toHaveBeenNthCalledWith(2, `Successfully responded with ${HTTP_STATUS.OK} OK`);
     
     // Verify handle405 was not called
     expect(handle405).not.toHaveBeenCalled();
@@ -90,7 +89,7 @@ describe('handleHelloRequest', () => {
     req.method = 'POST';
     
     // Call the handler with mock request and response
-    handleHelloRequest(req, res);
+    handleHealthRequest(req, res);
     
     // Verify handle405 was called with the response object
     expect(handle405).toHaveBeenCalledWith(res);
@@ -102,37 +101,37 @@ describe('handleHelloRequest', () => {
     expect(res.end).not.toHaveBeenCalled();
     
     // Verify logger.info and logger.error were called with appropriate messages
-    expect(logger.info).toHaveBeenCalledWith('Handling POST request to /hello endpoint');
+    expect(logger.info).toHaveBeenCalledWith('Handling POST request to /health endpoint');
     expect(logger.error).toHaveBeenCalledWith(`Received unsupported POST method, expected ${HTTP_METHODS.GET}`);
   });
   
   // Test case for isGetMethod function behavior
   it('should correctly identify GET method', () => {
-    // Test the behavior of isGetMethod indirectly through handleHelloRequest
+    // Test the behavior of isGetMethod indirectly through handleHealthRequest
     
     // GET should be accepted (isGetMethod returns true)
     req.method = 'GET';
-    handleHelloRequest(req, res);
+    handleHealthRequest(req, res);
     expect(handle405).not.toHaveBeenCalled();
-    expect(res.end).toHaveBeenCalledWith(MESSAGES.HELLO_RESPONSE);
+    expect(res.end).toHaveBeenCalledWith('');
     jest.clearAllMocks();
     res.statusCode = null;
     
     // POST should be rejected (isGetMethod returns false)
     req.method = 'POST';
-    handleHelloRequest(req, res);
+    handleHealthRequest(req, res);
     expect(handle405).toHaveBeenCalled();
     jest.clearAllMocks();
     
     // PUT should be rejected (isGetMethod returns false)
     req.method = 'PUT';
-    handleHelloRequest(req, res);
+    handleHealthRequest(req, res);
     expect(handle405).toHaveBeenCalled();
     jest.clearAllMocks();
     
     // DELETE should be rejected (isGetMethod returns false)
     req.method = 'DELETE';
-    handleHelloRequest(req, res);
+    handleHealthRequest(req, res);
     expect(handle405).toHaveBeenCalled();
   });
 });

@@ -12,7 +12,7 @@ This project demonstrates a minimal, functional example of a Node.js web service
 ### Key Features
 
 - Pure Node.js implementation using only core modules
-- Single `/hello` endpoint with proper HTTP method validation
+- Single `/hello` endpoint with proper HTTP method validation, plus `/health` endpoint for server health checks
 - Configurable server port via environment variables
 - Comprehensive error handling and logging
 - Clean separation of concerns with modular architecture
@@ -28,8 +28,10 @@ graph TD
     Client[HTTP Client] -->|Request| Server[HTTP Server]
     Server -->|Route Request| Router[Request Router]
     Router -->|/hello| HelloHandler[Hello Handler]
+    Router -->|/health| HealthHandler[Health Handler]
     Router -->|Not Found| ErrorHandler[Error Handler]
     HelloHandler -->|Response| Server
+    HealthHandler -->|Response| Server
     ErrorHandler -->|Error Response| Server
     Server -->|Response| Client
     
@@ -37,6 +39,8 @@ graph TD
     Server -.->|Logging| Logger[Logger]
     HelloHandler -.->|Constants| Constants[Constants]
     HelloHandler -.->|Logging| Logger
+    HealthHandler -.->|Constants| Constants[Constants]
+    HealthHandler -.->|Logging| Logger
     ErrorHandler -.->|Constants| Constants
     ErrorHandler -.->|Logging| Logger
 ```
@@ -129,6 +133,24 @@ Returns a simple "Hello world" text response.
 **Error Responses:**
 - 405 Method Not Allowed: If any HTTP method other than GET is used
 - 404 Not Found: If the path is not `/hello`
+
+### GET /health
+
+Returns an empty response to indicate server health status.
+
+**Request:**
+- Method: GET
+- Path: `/health`
+- Headers: None required
+- Body: None
+
+**Response:**
+- Status: 200 OK
+- Content-Type: text/plain
+- Body: (empty)
+
+**Error Responses:**
+- 405 Method Not Allowed: If any HTTP method other than GET is used
 
 ## Project Structure
 

@@ -10,9 +10,7 @@ jest.mock('../utils/logger');
 
 // Import mocked dependencies
 const { createServer, startServer, setupGracefulShutdown } = require('../server');
-const { handleServerError } = require('../errorHandler');
 const logger = require('../utils/logger');
-const { MESSAGES } = require('../utils/constants');
 
 // Import the module to test - importing as "main" to match the specification
 const main = require('../index');

@@ -32,10 +32,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Future features will be listed here
+- Health check endpoint (`GET /health`) returning 200 OK with empty body
+- Unit tests for health handler (healthHandler.test.js)
+- Integration tests for /health endpoint
+- Router support for /health route
 
 ### Changed
-- Future changes will be listed here
+- Updated constants to include HEALTH route constant
+- Updated router to handle /health path
 
 ### Fixed
 - Future fixes will be listed here

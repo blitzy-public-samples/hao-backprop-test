@@ -8,12 +8,14 @@ const route = require('../router');
 
 // Import handlers and utilities used by the router
 const { handleHelloRequest } = require('../handlers/helloHandler');
+const { handleHealthRequest } = require('../handlers/healthHandler');
 const { handle404 } = require('../errorHandler');
 const { ROUTES } = require('../utils/constants');
 const logger = require('../utils/logger');
 
 // Mock dependencies
 jest.mock('../handlers/helloHandler');
+jest.mock('../handlers/healthHandler');
 jest.mock('../errorHandler');
 jest.mock('../utils/logger');
 
@@ -26,7 +28,7 @@ describe('route', () => {
     // Setup fresh mocks before each test
     req = {
       url: '/hello',
-      method: 'GET'
+      method: 'GET',
     };
     res = {};
     
@@ -49,8 +51,8 @@ describe('route', () => {
     // Verify the logger was called with the request
     expect(logger.request).toHaveBeenCalledWith(req);
     
-    // Verify debugging information was logged
-    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('/hello'));
+    // Verify routing information was logged
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('/hello'));
     
     // Verify the correct handler was called
     expect(handleHelloRequest).toHaveBeenCalledWith(req, res);
@@ -69,8 +71,8 @@ describe('route', () => {
     // Verify the logger was called with the request
     expect(logger.request).toHaveBeenCalledWith(req);
     
-    // Verify debugging information was logged
-    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('/undefined'));
+    // Verify routing information was logged
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('/undefined'));
     
     // Verify the 404 handler was called
     expect(handle404).toHaveBeenCalledWith(res);
@@ -86,8 +88,8 @@ describe('route', () => {
     // Call the route function
     route(req, res);
     
-    // Verify debugging information contains only the path (not query params)
-    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('/hello'));
+    // Verify routing information contains only the path (not query params)
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('/hello'));
     
     // Verify the correct handler was called based on the parsed path
     expect(handleHelloRequest).toHaveBeenCalledWith(req, res);
@@ -104,7 +106,7 @@ describe('route', () => {
     route(req, res);
     
     // Verify fallback behavior for parsing errors
-    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('/'));
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('/'));
     expect(handle404).toHaveBeenCalledWith(res);
     expect(handleHelloRequest).not.toHaveBeenCalled();
   });
@@ -124,9 +126,81 @@ describe('route', () => {
     expect(handleHelloRequest).toHaveBeenCalled();
     jest.clearAllMocks();
     
+    // Test the /health route
+    req.url = ROUTES.HEALTH;
+    route(req, res);
+    expect(handleHealthRequest).toHaveBeenCalled();
+    jest.clearAllMocks();
+    
+    // Test /health with trailing slash (which should be normalized)
+    req.url = ROUTES.HEALTH + '/';
+    route(req, res);
+    expect(handleHealthRequest).toHaveBeenCalled();
+    jest.clearAllMocks();
+    
     // Test an undefined route
     req.url = '/notdefined';
     route(req, res);
     expect(handle404).toHaveBeenCalled();
+  });
+
+  it('should route to handleHealthRequest for /health path', () => {
+    // Set request URL to /health
+    req.url = '/health';
+    
+    // Call the route function
+    route(req, res);
+    
+    // Verify the logger was called with the request
+    expect(logger.request).toHaveBeenCalledWith(req);
+    
+    // Verify routing information was logged
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('/health'));
+    
+    // Verify the correct handler was called
+    expect(handleHealthRequest).toHaveBeenCalledWith(req, res);
+    
+    // Verify other handlers were not called
+    expect(handleHelloRequest).not.toHaveBeenCalled();
+    expect(handle404).not.toHaveBeenCalled();
+  });
+
+  it('should route to handleHealthRequest for /health/ path with trailing slash', () => {
+    // Set request URL to /health/
+    req.url = '/health/';
+    
+    // Call the route function
+    route(req, res);
+    
+    // Verify the correct handler was called
+    expect(handleHealthRequest).toHaveBeenCalledWith(req, res);
+    
+    // Verify other handlers were not called
+    expect(handleHelloRequest).not.toHaveBeenCalled();
+    expect(handle404).not.toHaveBeenCalled();
+  });
+
+  it('should route to handleHealthRequest for /health with query parameters', () => {
+    // Set request URL with query parameters
+    req.url = '/health?param=value';
+    
+    // Call the route function
+    route(req, res);
+    
+    // Verify the correct handler was called based on the parsed path
+    expect(handleHealthRequest).toHaveBeenCalledWith(req, res);
+    
+    // Verify other handlers were not called
+    expect(handleHelloRequest).not.toHaveBeenCalled();
+    expect(handle404).not.toHaveBeenCalled();
+  });
+
+  it('should correctly match health route using ROUTES constant', () => {
+    // Test the /health route using the ROUTES constant
+    req.url = ROUTES.HEALTH;
+    route(req, res);
+    expect(handleHealthRequest).toHaveBeenCalled();
+    expect(handleHelloRequest).not.toHaveBeenCalled();
+    expect(handle404).not.toHaveBeenCalled();
   });
 });

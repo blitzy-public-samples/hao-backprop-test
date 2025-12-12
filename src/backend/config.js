@@ -54,7 +54,7 @@ function getConfig() {
   
   // Return an object with the port property
   return {
-    port
+    port,
   };
 }
 

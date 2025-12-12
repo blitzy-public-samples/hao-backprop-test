@@ -7,7 +7,6 @@
  */
 
 const request = require('supertest'); // v6.3.3
-const { server } = require('../../index');
 const { startServer, stopServer } = require('../../server');
 const { HTTP_STATUS, MESSAGES, ROUTES } = require('../../utils/constants');
 const getConfig = require('../../config'); // Default import
@@ -74,6 +73,58 @@ describe('API Integration Tests', () => {
     
     const response = await request(`http://localhost:${config.port}`)
       .delete(ROUTES.HELLO)
+      .expect(HTTP_STATUS.METHOD_NOT_ALLOWED)
+      .expect('Content-Type', 'text/plain')
+      .expect('Allow', 'GET');
+    
+    expect(response.text).toContain('Method Not Allowed');
+  });
+  
+  // Test GET request to /health endpoint
+  test('GET /health should return 200 OK with empty body', async () => {
+    const config = getConfig();
+    
+    const response = await request(`http://localhost:${config.port}`)
+      .get(ROUTES.HEALTH)
+      .expect(HTTP_STATUS.OK)
+      .expect('Content-Type', 'text/plain');
+    
+    // Verify empty response body
+    expect(response.text).toBe('');
+  });
+  
+  // Test POST request to /health endpoint
+  test('POST /health should return 405 Method Not Allowed', async () => {
+    const config = getConfig();
+    
+    const response = await request(`http://localhost:${config.port}`)
+      .post(ROUTES.HEALTH)
+      .expect(HTTP_STATUS.METHOD_NOT_ALLOWED)
+      .expect('Content-Type', 'text/plain')
+      .expect('Allow', 'GET');
+    
+    expect(response.text).toContain('Method Not Allowed');
+  });
+  
+  // Test PUT request to /health endpoint
+  test('PUT /health should return 405 Method Not Allowed', async () => {
+    const config = getConfig();
+    
+    const response = await request(`http://localhost:${config.port}`)
+      .put(ROUTES.HEALTH)
+      .expect(HTTP_STATUS.METHOD_NOT_ALLOWED)
+      .expect('Content-Type', 'text/plain')
+      .expect('Allow', 'GET');
+    
+    expect(response.text).toContain('Method Not Allowed');
+  });
+  
+  // Test DELETE request to /health endpoint
+  test('DELETE /health should return 405 Method Not Allowed', async () => {
+    const config = getConfig();
+    
+    const response = await request(`http://localhost:${config.port}`)
+      .delete(ROUTES.HEALTH)
       .expect(HTTP_STATUS.METHOD_NOT_ALLOWED)
       .expect('Content-Type', 'text/plain')
       .expect('Allow', 'GET');

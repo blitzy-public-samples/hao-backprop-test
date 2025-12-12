@@ -147,5 +147,5 @@ module.exports = {
   createServer,
   startServer,
   stopServer,
-  setupGracefulShutdown
+  setupGracefulShutdown,
 };

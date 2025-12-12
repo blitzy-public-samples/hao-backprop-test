@@ -27,7 +27,7 @@ function resetMocks() {
 function createMockRequest() {
   return {
     method: 'GET',
-    url: '/hello'
+    url: '/hello',
   };
 }
 
@@ -38,7 +38,7 @@ function createMockRequest() {
 function createMockResponse() {
   return {
     statusCode: 200,
-    getHeader: jest.fn().mockReturnValue(11) // "Hello world" is 11 bytes
+    getHeader: jest.fn().mockReturnValue(11), // "Hello world" is 11 bytes
   };
 }
 
