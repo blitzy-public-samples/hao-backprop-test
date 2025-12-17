@@ -268,17 +268,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // Extract the error message, handling different exception types
     // If exception is an Error object, get its message property
     // Otherwise, convert to string for logging
-    const errorMessage =
-      exception instanceof Error
-        ? exception.message
-        : String(exception);
+    const errorMessage = exception instanceof Error ? exception.message : String(exception);
 
     // Extract stack trace if available (only Error objects have stack traces)
     // Stack trace is crucial for debugging production issues
-    const stackTrace =
-      exception instanceof Error
-        ? exception.stack
-        : 'No stack trace available';
+    const stackTrace = exception instanceof Error ? exception.stack : 'No stack trace available';
 
     // -------------------------------------------------------------------------
     // Log Exception Details

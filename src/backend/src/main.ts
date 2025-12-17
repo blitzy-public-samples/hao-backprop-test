@@ -195,7 +195,6 @@ async function bootstrap(): Promise<void> {
     // This matches the original logging format from server.js
     logger.log(`Application is running on: http://localhost:${port}`);
     logger.log(`Environment: ${configService.get('nodeEnv', 'development')}`);
-
   } catch (error) {
     // -------------------------------------------------------------------------
     // Error Handling
