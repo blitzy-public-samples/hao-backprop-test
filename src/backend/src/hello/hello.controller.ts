@@ -18,7 +18,7 @@
  * Key features:
  * - @Controller('hello') decorator for route registration
  * - @Get() decorator for handling GET requests only
- * - Automatic 405 Method Not Allowed for non-GET methods (NestJS built-in)
+ * - Explicit 405 Method Not Allowed for non-GET methods via @Post/@Put/@Delete/@Patch handlers
  * - Dependency injection of HelloService for business logic
  * - Proper Content-Type header handling
  *
@@ -35,8 +35,8 @@
  *
  * @example
  * // POST request to /hello returns 405 Method Not Allowed
- * curl -X POST http://localhost:3000/hello
- * // Response: Method Not Allowed (405)
+ * curl -X POST http://localhost:3000/hello -i
+ * // Response: 405 Method Not Allowed with Allow: GET header
  */
 
 /* ============================================================================
@@ -52,10 +52,15 @@
 import {
   Controller, // Decorator defining this class as an HTTP controller
   Get, // Decorator for handling HTTP GET requests
+  Post, // Decorator for handling HTTP POST requests
+  Put, // Decorator for handling HTTP PUT requests
+  Delete, // Decorator for handling HTTP DELETE requests
+  Patch, // Decorator for handling HTTP PATCH requests
   Logger, // NestJS built-in logger for consistent logging
   Header, // Decorator for setting response headers
   HttpCode, // Decorator for setting HTTP status code
   HttpStatus, // Enum containing HTTP status code constants
+  MethodNotAllowedException, // Exception for 405 responses
 } from '@nestjs/common';
 
 // -----------------------------------------------------------------------------
@@ -97,12 +102,12 @@ import { HelloService } from './hello.service';
  * - Registers the '/hello' route via @Controller('hello')
  * - Handles GET requests via @Get() decorator
  * - Delegates business logic to HelloService
- * - Automatically rejects non-GET methods with 405 (NestJS default behavior)
+ * - Explicitly rejects non-GET methods with 405 via handleMethodNotAllowed()
  *
  * This replaces:
  * - router.js: Manual URL path matching and routing
  * - helloHandler.js: The handleHelloRequest(req, res) function
- * - errorHandler.js: The handle405(res) function (now automatic)
+ * - errorHandler.js: The handle405(res) function (via handleMethodNotAllowed())
  *
  * @example
  * // GET /hello request flow:
@@ -112,10 +117,10 @@ import { HelloService } from './hello.service';
  * // 4. Response sent with 200 OK status
  *
  * @example
- * // POST /hello request flow (automatic 405):
+ * // POST /hello request flow (explicit 405):
  * // 1. NestJS receives POST /hello
- * // 2. No POST handler found in controller
- * // 3. NestJS automatically returns 405 Method Not Allowed
+ * // 2. Matched to handleMethodNotAllowed() via @Post() decorator
+ * // 3. MethodNotAllowedException thrown, returning 405 Method Not Allowed
  */
 @Controller('hello') // Registers this controller for /hello route
 export class HelloController {
@@ -195,10 +200,11 @@ export class HelloController {
    * - Lines 42-44: res.end(MESSAGES.HELLO_RESPONSE) → return statement
    *
    * Note on 405 handling:
-   * NestJS automatically returns 405 Method Not Allowed for HTTP methods
-   * that don't have a handler defined. Since only @Get() is decorated,
-   * POST, PUT, DELETE, etc. will automatically receive 405 responses.
-   * This replaces the handle405(res) function from errorHandler.js.
+   * NestJS does NOT automatically return 405 for unhandled methods - it
+   * returns 404 Not Found. To maintain backward compatibility with the
+   * original helloHandler.js API contract, explicit handlers for POST,
+   * PUT, DELETE, and PATCH are defined via handleMethodNotAllowed().
+   * This explicitly replaces the handle405(res) function from errorHandler.js.
    *
    * @returns {string} The 'Hello world' message from HelloService
    *
@@ -227,5 +233,70 @@ export class HelloController {
     // Return the response - NestJS handles serialization
     // This replaces res.end(MESSAGES.HELLO_RESPONSE) from helloHandler.js
     return response;
+  }
+
+  /* --------------------------------------------------------------------------
+   * METHOD NOT ALLOWED HANDLERS
+   * --------------------------------------------------------------------------
+   * Explicit handlers for non-GET methods to return 405 status
+   * NestJS does NOT automatically return 405 for unhandled methods - it
+   * returns 404 Not Found. These explicit handlers ensure backward
+   * compatibility with the original helloHandler.js API contract.
+   * -------------------------------------------------------------------------- */
+
+  /**
+   * Handles POST requests to /hello - returns 405 Method Not Allowed
+   *
+   * @method handlePost
+   * @description Explicitly handles POST requests to maintain API contract.
+   *   NestJS does not auto-return 405, so this method throws MethodNotAllowedException.
+   * @throws {MethodNotAllowedException} Always throws 405 error
+   */
+  @Post()
+  handlePost(): never {
+    this.logger.warn('Rejecting POST request to /hello - Method Not Allowed');
+    throw new MethodNotAllowedException('Method Not Allowed');
+  }
+
+  /**
+   * Handles PUT requests to /hello - returns 405 Method Not Allowed
+   *
+   * @method handlePut
+   * @description Explicitly handles PUT requests to maintain API contract.
+   *   NestJS does not auto-return 405, so this method throws MethodNotAllowedException.
+   * @throws {MethodNotAllowedException} Always throws 405 error
+   */
+  @Put()
+  handlePut(): never {
+    this.logger.warn('Rejecting PUT request to /hello - Method Not Allowed');
+    throw new MethodNotAllowedException('Method Not Allowed');
+  }
+
+  /**
+   * Handles DELETE requests to /hello - returns 405 Method Not Allowed
+   *
+   * @method handleDelete
+   * @description Explicitly handles DELETE requests to maintain API contract.
+   *   NestJS does not auto-return 405, so this method throws MethodNotAllowedException.
+   * @throws {MethodNotAllowedException} Always throws 405 error
+   */
+  @Delete()
+  handleDelete(): never {
+    this.logger.warn('Rejecting DELETE request to /hello - Method Not Allowed');
+    throw new MethodNotAllowedException('Method Not Allowed');
+  }
+
+  /**
+   * Handles PATCH requests to /hello - returns 405 Method Not Allowed
+   *
+   * @method handlePatch
+   * @description Explicitly handles PATCH requests to maintain API contract.
+   *   NestJS does not auto-return 405, so this method throws MethodNotAllowedException.
+   * @throws {MethodNotAllowedException} Always throws 405 error
+   */
+  @Patch()
+  handlePatch(): never {
+    this.logger.warn('Rejecting PATCH request to /hello - Method Not Allowed');
+    throw new MethodNotAllowedException('Method Not Allowed');
   }
 }
