@@ -118,22 +118,18 @@
   ],
 
   /**
-   * CompilerOptions Overrides (Optional)
+   * CompilerOptions Overrides for Production Builds
    * 
-   * No compiler option overrides are needed for production builds.
-   * The base tsconfig.json already configures:
-   * - Output directory: ./dist
-   * - Source root: ./src
-   * - Source maps: enabled
-   * - Declarations: enabled
-   * 
-   * If production-specific optimizations are needed in the future,
-   * they can be added here. Examples might include:
-   * - "sourceMap": false (disable source maps for smaller builds)
-   * - "removeComments": true (strip comments for smaller output)
-   * 
-   * Current configuration keeps source maps and comments for:
-   * - Production debugging capability
-   * - Documentation preservation
+   * Production-specific compiler options that override the base config.
+   * These settings ensure clean, optimized production output.
    */
+  "compilerOptions": {
+    /**
+     * Root directory for production builds.
+     * Override the base config's "./" to use "./src" for production.
+     * This ensures only source files are compiled, maintaining the
+     * expected directory structure in the dist output.
+     */
+    "rootDir": "./src"
+  }
 }

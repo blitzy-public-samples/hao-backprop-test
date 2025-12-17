@@ -46,21 +46,28 @@ module.exports = {
   
   /**
    * Root directory for Jest to scan for tests and modules.
-   * Points to the NestJS source directory where all TypeScript source files reside.
+   * Points to the backend root directory where both src/ and test/ directories reside.
    * All relative paths in this configuration are resolved from this directory.
+   * This allows Jest to find both source files in src/ and test files in test/.
    */
-  rootDir: 'src',
+  rootDir: '.',
   
   /**
    * Patterns to match test files.
-   * Matches all files ending with .spec.ts or .test.ts anywhere in the project.
+   * Matches all files ending with .spec.ts or .test.ts in both src and test directories.
    * NestJS convention uses .spec.ts for unit tests co-located with source files.
    * 
    * Pattern explanation:
-   * - **\/*.spec.ts: Matches any .spec.ts file in any subdirectory
-   * - **\/*.test.ts: Matches any .test.ts file in any subdirectory (alternative naming)
+   * - src directory spec files: Matches any .spec.ts file in src subdirectory (co-located tests)
+   * - test directory spec files: Matches any .spec.ts file in test subdirectory (separate tests)
+   * - Supports both .spec.ts and .test.ts naming conventions
    */
-  testMatch: ['**/*.spec.ts', '**/*.test.ts'],
+  testMatch: [
+    '<rootDir>/src/**/*.spec.ts',
+    '<rootDir>/src/**/*.test.ts',
+    '<rootDir>/test/**/*.spec.ts',
+    '<rootDir>/test/**/*.test.ts',
+  ],
   
   /**
    * Paths to ignore when searching for test files.
@@ -98,7 +105,7 @@ module.exports = {
    *   import { AppService } from '../../../app.service';
    */
   moduleNameMapper: {
-    '^src/(.*)$': '<rootDir>/$1',
+    '^src/(.*)$': '<rootDir>/src/$1',
   },
   
   // ============================================================================
@@ -107,10 +114,10 @@ module.exports = {
   
   /**
    * Directory where Jest should output coverage reports.
-   * Set to '../coverage' to output coverage files outside the src/ directory,
+   * Set to './coverage' to output coverage files in the backend directory,
    * keeping the source tree clean and making it easier to configure .gitignore.
    */
-  coverageDirectory: '../coverage',
+  coverageDirectory: './coverage',
   
   /**
    * Patterns specifying which files to include in coverage reports.
@@ -125,12 +132,12 @@ module.exports = {
    * This ensures coverage metrics reflect actual application logic quality.
    */
   collectCoverageFrom: [
-    '**/*.ts',
-    '!**/*.module.ts',
+    'src/**/*.ts',
+    '!src/**/*.module.ts',
     '!**/node_modules/**',
     '!**/dist/**',
     '!**/*.d.ts',
-    '!main.ts',
+    '!src/main.ts',
     '!**/*.spec.ts',
     '!**/*.test.ts',
   ],

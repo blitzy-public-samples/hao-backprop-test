@@ -211,10 +211,11 @@
     
     /**
      * Root directory of input files.
-     * Specifies the root folder containing TypeScript source files.
-     * Used to calculate the output directory structure.
+     * Set to "./" to include both src/ and test/ directories.
+     * This allows TypeScript to type-check tests alongside source files.
+     * The tsconfig.build.json restricts compilation to src/ only for production.
      */
-    "rootDir": "./src",
+    "rootDir": "./",
     
     /**
      * Generate .d.ts declaration files.
