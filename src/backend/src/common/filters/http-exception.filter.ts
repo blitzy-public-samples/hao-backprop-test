@@ -312,9 +312,7 @@ export class HttpExceptionFilter implements ExceptionFilter<HttpException> {
         : typeof exceptionResponse === 'object' &&
             exceptionResponse !== null &&
             'message' in exceptionResponse
-          ? String(
-              (exceptionResponse as Record<string, unknown>).message,
-            )
+          ? String((exceptionResponse as Record<string, unknown>).message)
           : exception.message;
 
     // -------------------------------------------------------------------------
@@ -330,9 +328,7 @@ export class HttpExceptionFilter implements ExceptionFilter<HttpException> {
     if (status === HttpStatus.NOT_FOUND) {
       // Log the 404 response with request details for debugging
       // Format matches original: "Responding with 404 Not Found"
-      this.logger.log(
-        `Responding with 404 Not Found - ${request.method} ${request.url}`,
-      );
+      this.logger.log(`Responding with 404 Not Found - ${request.method} ${request.url}`);
 
       // Send the 404 response with proper headers and body
       response
@@ -363,9 +359,7 @@ export class HttpExceptionFilter implements ExceptionFilter<HttpException> {
     if (status === HttpStatus.METHOD_NOT_ALLOWED) {
       // Log the 405 response with request details for debugging
       // Format matches original: "Responding with 405 Method Not Allowed"
-      this.logger.log(
-        `Responding with 405 Method Not Allowed - ${request.method} ${request.url}`,
-      );
+      this.logger.log(`Responding with 405 Method Not Allowed - ${request.method} ${request.url}`);
 
       // Send the 405 response with proper headers and body
       // The Allow header is REQUIRED per Section 0.6.4 of the spec
@@ -392,15 +386,10 @@ export class HttpExceptionFilter implements ExceptionFilter<HttpException> {
 
     // Log a warning for unexpected HTTP exceptions that might need attention
     // This helps identify edge cases that may need specialized handling
-    this.logger.warn(
-      `HTTP Exception ${status}: ${message} - ${request.method} ${request.url}`,
-    );
+    this.logger.warn(`HTTP Exception ${status}: ${message} - ${request.method} ${request.url}`);
 
     // Send the response with the exception's status and message
     // Content-Type is set to text/plain for consistency with other responses
-    response
-      .status(status)
-      .set(HEADERS.CONTENT_TYPE, HEADERS.CONTENT_TYPE_TEXT)
-      .send(message);
+    response.status(status).set(HEADERS.CONTENT_TYPE, HEADERS.CONTENT_TYPE_TEXT).send(message);
   }
 }
