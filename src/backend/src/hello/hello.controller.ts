@@ -64,6 +64,15 @@ import {
 // Business logic service for the hello endpoint
 import { HelloService } from './hello.service';
 
+// -----------------------------------------------------------------------------
+// Data Transfer Objects (DTOs)
+// -----------------------------------------------------------------------------
+// Type-safe response structure for API documentation and type annotations
+// Note: This import is optional and used for documentation purposes.
+// The controller returns a plain string for backward compatibility with
+// the original helloHandler.js implementation (res.end(MESSAGES.HELLO_RESPONSE))
+import { HelloResponseDto } from './dto/hello-response.dto';
+
 /* ============================================================================
  * HELLO CONTROLLER CLASS
  * ============================================================================
