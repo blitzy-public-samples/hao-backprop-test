@@ -1,99 +1,184 @@
-# Node.js Hello World
+# NestJS Hello World
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org/)
+[![NestJS](https://img.shields.io/badge/NestJS-v11-red.svg)](https://nestjs.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
 
-A simple Node.js HTTP server application that exposes a single REST endpoint `/hello` which returns "Hello world" to clients.
+A production-ready HTTP server application built with the NestJS framework that exposes a single REST endpoint `/hello` which returns "Hello world" to clients.
 
 ## Overview
 
-This project demonstrates a minimal, functional example of a Node.js web service that can serve as a learning tool or starter template. It implements a lightweight HTTP server using only Node.js core modules with no external dependencies for the runtime.
+This project demonstrates a robust, scalable example of a NestJS web service that can serve as a learning tool or starter template for building enterprise-grade Node.js applications. It implements a modern HTTP server using NestJS's powerful decorator-based architecture with full TypeScript support.
 
 ### Key Features
 
-- Pure Node.js implementation using only core modules
-- Single `/hello` endpoint with proper HTTP method validation, plus `/health` endpoint for server health checks
-- Configurable server port via environment variables
-- Comprehensive error handling and logging
-- Clean separation of concerns with modular architecture
-- Complete test coverage with Jest and Supertest
-- Detailed documentation for learning and reference
+- **NestJS Framework**: Enterprise-grade framework with built-in best practices and patterns
+- **TypeScript First**: Full type safety with strict mode enabled for reliable code
+- **Decorator-Based Routing**: Clean, declarative route handling with `@Controller()` and `@Get()` decorators
+- **Dependency Injection**: Modular, testable architecture with NestJS's built-in DI container
+- **Modular Architecture**: Well-organized code with feature modules (HelloModule, ConfigModule)
+- **Exception Filters**: Centralized error handling with custom exception filters
+- **Configuration Management**: Type-safe configuration using `@nestjs/config` module
+- **Comprehensive Testing**: Full test coverage with Jest and NestJS testing utilities
+- **Production Ready**: Includes health checks, graceful shutdown, and Docker support
+- **Detailed Documentation**: Extensive inline comments and architecture documentation
+
+For a comprehensive understanding of the design decisions and architecture, see [Architecture Documentation](architecture.md).
 
 ## Architecture
 
-The application follows a simple, modular architecture with clean separation of concerns:
+The application follows NestJS's modular architecture pattern with clean separation of concerns and dependency injection throughout:
 
 ```mermaid
 graph TD
-    Client[HTTP Client] -->|Request| Server[HTTP Server]
-    Server -->|Route Request| Router[Request Router]
-    Router -->|/hello| HelloHandler[Hello Handler]
-    Router -->|/health| HealthHandler[Health Handler]
-    Router -->|Not Found| ErrorHandler[Error Handler]
-    HelloHandler -->|Response| Server
-    HealthHandler -->|Response| Server
-    ErrorHandler -->|Error Response| Server
-    Server -->|Response| Client
+    subgraph "Application Bootstrap"
+        Main[main.ts<br/>Bootstrap & Configuration]
+    end
     
-    Server -.->|Configuration| Config[Configuration]
-    Server -.->|Logging| Logger[Logger]
-    HelloHandler -.->|Constants| Constants[Constants]
-    HelloHandler -.->|Logging| Logger
-    HealthHandler -.->|Constants| Constants[Constants]
-    HealthHandler -.->|Logging| Logger
-    ErrorHandler -.->|Constants| Constants
-    ErrorHandler -.->|Logging| Logger
+    subgraph "Root Module"
+        AppModule[AppModule<br/>Root Module]
+        AppController[AppController<br/>Health Check]
+        AppService[AppService<br/>Root Service]
+    end
+    
+    subgraph "Feature Module: Hello"
+        HelloModule[HelloModule]
+        HelloController[HelloController<br/>GET /hello]
+        HelloService[HelloService<br/>Business Logic]
+    end
+    
+    subgraph "Configuration Module"
+        ConfigModule[ConfigModule]
+        Configuration[configuration.ts<br/>Type-safe Config]
+    end
+    
+    subgraph "Common Module"
+        Filters[Exception Filters<br/>HTTP & All Exceptions]
+        Constants[Constants<br/>HTTP Status & Messages]
+    end
+    
+    Main -->|Creates| AppModule
+    AppModule -->|Imports| HelloModule
+    AppModule -->|Imports| ConfigModule
+    AppModule -->|Uses| AppController
+    AppModule -->|Provides| AppService
+    AppModule -->|Uses| Filters
+    
+    HelloModule -->|Declares| HelloController
+    HelloModule -->|Provides| HelloService
+    HelloController -->|Injects| HelloService
+    
+    ConfigModule -->|Loads| Configuration
+    
+    HelloController -.->|Uses| Constants
+    Filters -.->|Uses| Constants
 ```
 
 ### Core Components
 
-1. **HTTP Server**: Creates and manages the HTTP server using Node.js core `http` module
-2. **Request Router**: Routes requests to appropriate handlers based on URL path
-3. **Hello Handler**: Processes requests to the `/hello` endpoint
-4. **Error Handler**: Centralizes error handling and generates error responses
-5. **Configuration**: Manages server settings from environment variables
-6. **Logger**: Provides consistent logging throughout the application
-7. **Constants**: Defines shared constants for the application
+1. **NestJS Application** (`main.ts`): Bootstraps the application with NestJS factory, configures global filters, and handles graceful shutdown
+2. **AppModule** (Root Module): The root module that imports all feature modules and sets up global providers
+3. **HelloModule**: Feature module encapsulating the `/hello` endpoint functionality
+4. **HelloController**: Handles HTTP requests to `/hello` using decorator-based routing
+5. **HelloService**: Contains business logic for generating the hello message (injectable service)
+6. **Exception Filters**: Global filters for consistent error handling (404, 405, 500 responses)
+7. **ConfigModule**: Manages environment-based configuration with validation
+8. **Constants**: TypeScript constants and enums for HTTP status codes and messages
+
+### Request Lifecycle
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant NestJS as NestJS Platform
+    participant Filter as Exception Filter
+    participant Controller as HelloController
+    participant Service as HelloService
+    
+    Client->>NestJS: GET /hello
+    NestJS->>Controller: Route to hello()
+    Controller->>Service: getHello()
+    Service-->>Controller: "Hello world"
+    Controller-->>NestJS: Response body
+    NestJS-->>Client: 200 OK "Hello world"
+    
+    Note over Client,Service: Error Flow
+    Client->>NestJS: POST /hello
+    NestJS->>Controller: Method Not Allowed
+    Controller->>Filter: Exception thrown
+    Filter-->>Client: 405 Method Not Allowed
+```
 
 ## Prerequisites
 
-- Node.js 18.x LTS or higher
-- npm 8.x or higher (included with Node.js)
-- Git (optional, for cloning the repository)
+Before getting started, ensure you have the following installed:
+
+- **Node.js**: Version 18.x LTS or higher (required for NestJS 11)
+- **npm**: Version 9.x or higher (included with Node.js 18+)
+- **TypeScript**: Installed automatically as a dev dependency
+- **Git**: Optional, for cloning the repository
+
+You can verify your Node.js and npm versions:
+
+```bash
+node --version  # Should be >= 18.0.0
+npm --version   # Should be >= 9.0.0
+```
 
 ## Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/nodejs-hello-world.git
-cd nodejs-hello-world
+git clone https://github.com/yourusername/nestjs-hello-world.git
+cd nestjs-hello-world
 
-# Install dependencies
+# Navigate to the backend directory
+cd src/backend
+
+# Install dependencies (includes NestJS and TypeScript)
 npm install
+
+# Build the TypeScript project
+npm run build
 ```
 
 ### Configuration
 
-The server port can be configured using the `PORT` environment variable. If not specified, it defaults to `3000`.
+The server can be configured using environment variables. Create a `.env` file in the `src/backend` directory:
 
 ```bash
-# Create a .env file (optional)
-echo "PORT=3000" > .env
+# Create a .env file from the example template
+cp .env.example .env
+
+# Edit the configuration as needed
+# PORT=3000        - Server port (default: 3000)
+# NODE_ENV=development  - Environment mode
+# LOG_LEVEL=info   - Logging verbosity
 ```
 
 ## Usage
 
 ### Starting the Server
 
+The NestJS application provides several start modes for different use cases:
+
 ```bash
-# Start the server
-npm start
+# Navigate to the backend directory
+cd src/backend
+
+# Development mode with hot-reload (watches for file changes)
+npm run start:dev
+
+# Production mode (requires build first)
+npm run build
+npm run start:prod
+
+# Standard start (useful for debugging)
+npm run start
 
 # Start with a custom port
-PORT=8080 npm start
-
-# Start in development mode with auto-restart
-npm run dev
+PORT=8080 npm run start:prod
 ```
 
 Once started, the server will be available at `http://localhost:3000` (or your configured port).
@@ -101,19 +186,24 @@ Once started, the server will be available at `http://localhost:3000` (or your c
 ### Making Requests
 
 ```bash
-# Using curl
+# Using curl to call the hello endpoint
 curl http://localhost:3000/hello
 
 # Using a web browser
 # Navigate to http://localhost:3000/hello
+
+# Check server health
+curl http://localhost:3000/health
 ```
 
-Expected response:
+Expected response from `/hello`:
 ```
 Hello world
 ```
 
 ## API Documentation
+
+The API maintains full backward compatibility with the original Node.js implementation.
 
 ### GET /hello
 
@@ -154,158 +244,274 @@ Returns an empty response to indicate server health status.
 
 ## Project Structure
 
+The project follows NestJS's recommended modular structure with TypeScript:
+
 ```
 .
 ├── src/
-│   └── backend/           # Backend implementation
-│       ├── __tests__/     # Test files
-│       ├── handlers/      # Request handlers
-│       ├── utils/         # Utility modules
-│       ├── config.js      # Configuration management
-│       ├── errorHandler.js # Error handling utilities
-│       ├── index.js       # Application entry point
-│       ├── router.js      # Request routing
-│       ├── server.js      # HTTP server implementation
-│       └── README.md      # Backend-specific documentation
-├── infrastructure/        # Infrastructure configuration
-│   ├── local/             # Local development setup
-│   ├── scripts/           # Utility scripts
-│   └── README.md          # Infrastructure documentation
-├── .github/               # GitHub configuration
-├── .gitignore             # Git ignore file
-├── .gitattributes         # Git attributes file
-├── .dockerignore          # Docker ignore file
-├── CODE_OF_CONDUCT.md     # Code of conduct
-├── CONTRIBUTING.md        # Contribution guidelines
-├── Dockerfile             # Docker configuration
-├── LICENSE                # License file
-└── README.md              # This file
+│   └── backend/                    # NestJS Backend Application
+│       ├── src/                    # Source code (TypeScript)
+│       │   ├── main.ts             # Application bootstrap & entry point
+│       │   ├── app.module.ts       # Root application module
+│       │   ├── app.controller.ts   # Root controller (health endpoint)
+│       │   ├── app.service.ts      # Root service
+│       │   ├── hello/              # Hello feature module
+│       │   │   ├── hello.module.ts     # Module definition
+│       │   │   ├── hello.controller.ts # Route handlers
+│       │   │   ├── hello.service.ts    # Business logic
+│       │   │   └── dto/                # Data Transfer Objects
+│       │   │       └── hello-response.dto.ts
+│       │   ├── common/             # Shared resources
+│       │   │   ├── constants/      # Application constants
+│       │   │   │   └── index.ts
+│       │   │   └── filters/        # Exception filters
+│       │   │       ├── http-exception.filter.ts
+│       │   │       └── all-exceptions.filter.ts
+│       │   └── config/             # Configuration module
+│       │       ├── config.module.ts
+│       │       └── configuration.ts
+│       ├── test/                   # Test files
+│       │   ├── app.e2e-spec.ts     # End-to-end tests
+│       │   ├── jest-e2e.json       # E2E test configuration
+│       │   └── unit/               # Unit tests
+│       │       ├── app.controller.spec.ts
+│       │       ├── app.service.spec.ts
+│       │       ├── hello/
+│       │       │   ├── hello.controller.spec.ts
+│       │       │   └── hello.service.spec.ts
+│       │       └── common/
+│       │           └── filters/
+│       │               └── http-exception.filter.spec.ts
+│       ├── dist/                   # Compiled JavaScript output
+│       ├── package.json            # Backend dependencies & scripts
+│       ├── tsconfig.json           # TypeScript configuration
+│       ├── tsconfig.build.json     # Build-specific TS config
+│       ├── nest-cli.json           # NestJS CLI configuration
+│       ├── jest.config.js          # Jest test configuration
+│       ├── .eslintrc.js            # ESLint configuration
+│       ├── .prettierrc             # Prettier formatting config
+│       ├── .env.example            # Environment template
+│       └── README.md               # Backend documentation
+├── infrastructure/                 # Infrastructure configuration
+│   ├── local/                      # Local development setup
+│   │   └── docker-compose.yml
+│   ├── scripts/                    # Utility scripts
+│   │   ├── setup.sh                # Development setup
+│   │   ├── start-server.sh         # Server startup
+│   │   └── health-check.sh         # Health monitoring
+│   └── README.md                   # Infrastructure documentation
+├── .github/                        # GitHub configuration
+│   └── workflows/                  # CI/CD pipelines
+│       ├── ci.yml                  # Continuous integration
+│       └── release.yml             # Release pipeline
+├── architecture.md                 # Architecture documentation (NEW)
+├── .gitignore                      # Git ignore file
+├── .gitattributes                  # Git attributes file
+├── .dockerignore                   # Docker ignore file
+├── CODE_OF_CONDUCT.md              # Code of conduct
+├── CONTRIBUTING.md                 # Contribution guidelines
+├── Dockerfile                      # Docker configuration
+├── LICENSE                         # License file
+└── README.md                       # This file
 ```
 
 For more detailed information about specific components:
 
-- [Backend Documentation](src/backend/README.md)
-- [Infrastructure Documentation](infrastructure/README.md)
+- [Architecture Documentation](architecture.md) - Design decisions and patterns
+- [Backend Documentation](src/backend/README.md) - Backend implementation details
+- [Infrastructure Documentation](infrastructure/README.md) - Deployment and DevOps
 
 ## Development
 
 ### Available Scripts
 
+Navigate to `src/backend` and use the following npm scripts:
+
 ```bash
-# Start the server
-npm start
+# Build the TypeScript project
+npm run build
 
-# Start with auto-restart on file changes
-npm run dev
+# Start in development mode with hot-reload
+npm run start:dev
 
-# Run tests
+# Start in debug mode with inspector
+npm run start:debug
+
+# Start production build
+npm run start:prod
+
+# Run all unit tests
 npm test
 
 # Run tests with coverage report
-npm run test:coverage
+npm run test:cov
 
 # Run tests in watch mode
 npm run test:watch
 
-# Lint code
+# Run end-to-end tests
+npm run test:e2e
+
+# Lint code (ESLint + TypeScript)
 npm run lint
 
-# Fix linting issues
-npm run lint:fix
+# Format code with Prettier
+npm run format
 ```
 
 ### Testing
 
-The application uses Jest for unit and integration testing with Supertest for API testing.
+The application uses Jest with NestJS testing utilities for comprehensive test coverage:
 
 ```bash
-# Run all tests
+# Navigate to backend directory
+cd src/backend
+
+# Run all unit tests
 npm test
 
 # Run tests with coverage report
-npm run test:coverage
+npm run test:cov
+
+# Run end-to-end (E2E) tests
+npm run test:e2e
+
+# Run tests in watch mode during development
+npm run test:watch
 ```
 
-Tests are organized in the `__tests__` directory, mirroring the structure of the source files.
+Tests are organized in the `test/` directory:
+- `test/unit/` - Unit tests for individual components
+- `test/app.e2e-spec.ts` - End-to-end API tests
+
+### Code Quality
+
+```bash
+# Run ESLint to check for issues
+npm run lint
+
+# Format all TypeScript files with Prettier
+npm run format
+```
 
 ## Docker
 
-The application can be run in a Docker container:
+The application can be run in a Docker container with optimized multi-stage builds for TypeScript compilation:
 
 ```bash
-# Build the Docker image
-docker build -t nodejs-hello-world .
+# Build the Docker image (includes TypeScript compilation)
+docker build -t nestjs-hello-world .
 
 # Run the container
-docker run -p 3000:3000 nodejs-hello-world
+docker run -p 3000:3000 nestjs-hello-world
 
 # Run with a custom port
-docker run -p 8080:8080 -e PORT=8080 nodejs-hello-world
+docker run -p 8080:8080 -e PORT=8080 nestjs-hello-world
+
+# Run in detached mode
+docker run -d -p 3000:3000 --name hello-app nestjs-hello-world
 ```
 
-Alternatively, you can use Docker Compose for local development:
+Alternatively, use Docker Compose for local development:
 
 ```bash
-# Start the container
+# Start the container (builds if needed)
 docker-compose -f infrastructure/local/docker-compose.yml up -d
+
+# View logs
+docker-compose -f infrastructure/local/docker-compose.yml logs -f
 
 # Stop the container
 docker-compose -f infrastructure/local/docker-compose.yml down
 ```
 
+### Docker Build Process
+
+The Dockerfile uses a multi-stage build:
+1. **Build Stage**: Installs dependencies and compiles TypeScript to JavaScript
+2. **Production Stage**: Copies only the compiled `dist/` folder and production dependencies
+
+This results in a smaller, more secure production image.
+
 ## Deployment Options
 
-This simple application can be deployed in several ways:
+This NestJS application can be deployed in several ways:
 
 ### Local Execution
 
-Run directly on your local machine or server:
+Run the compiled application directly:
 
 ```bash
-node src/backend/index.js
+# Build first
+cd src/backend
+npm run build
+
+# Run the compiled JavaScript
+node dist/main
 ```
 
 ### Platform as a Service (PaaS)
 
-Deploy to platforms like Heroku, Vercel, or Render that support Node.js applications.
+Deploy to platforms like Heroku, Vercel, Railway, or Render that support Node.js applications. Ensure the build command (`npm run build`) runs before start.
 
 ### Virtual Private Server (VPS)
 
 Deploy to a VPS with a process manager like PM2:
 
 ```bash
-# Install PM2
+# Install PM2 globally
 npm install -g pm2
 
+# Navigate to the backend directory
+cd src/backend
+
+# Build the application
+npm run build
+
 # Start the application with PM2
-pm2 start src/backend/index.js --name nodejs-hello-world
+pm2 start dist/main.js --name nestjs-hello-world
 
 # Configure PM2 to start on system boot
 pm2 startup
 pm2 save
+
+# View application status
+pm2 status
+
+# View logs
+pm2 logs nestjs-hello-world
 ```
+
+### Kubernetes
+
+For containerized deployments, use the provided Dockerfile and create Kubernetes manifests for deployment, service, and ingress resources.
 
 See [Infrastructure Documentation](infrastructure/README.md) for more deployment details.
 
 ## Performance Considerations
 
-The application is designed for minimal resource usage:
+NestJS provides excellent performance out of the box:
 
-- **Memory Footprint**: Low memory usage with no unnecessary buffers or caches
-- **Startup Time**: Fast initialization with minimal dependencies
-- **Request Processing**: Efficient routing and response generation
-- **Concurrency**: Node.js event loop handles concurrent connections efficiently
+- **Compiled TypeScript**: TypeScript compiles to optimized JavaScript for production
+- **Express Platform**: Built on Express.js with proven performance characteristics
+- **Lazy Loading**: Modules can be lazy-loaded for faster startup (not needed for this simple app)
+- **Memory Efficient**: Dependency injection creates singletons by default, reducing memory usage
+- **Request Processing**: NestJS's pipeline efficiently processes requests through guards, interceptors, and pipes
 
-For educational purposes, no specific performance optimizations are implemented beyond Node.js defaults.
+For production deployments:
+- Enable production mode: `NODE_ENV=production`
+- Use compiled JavaScript: `npm run start:prod`
+- Consider clustering for multi-core utilization
 
 ## Security Considerations
 
-Basic security practices implemented:
+Security best practices implemented:
 
-- **Input Validation**: Validates HTTP methods
-- **Error Handling**: Prevents information disclosure in error messages
-- **HTTP Headers**: Sets appropriate security headers
-- **Dependency Management**: Uses only core Node.js modules to eliminate supply chain risks
+- **Input Validation**: NestJS pipes can validate and transform input (extensible for future DTOs)
+- **Exception Filters**: Prevents information disclosure in error messages
+- **TypeScript**: Compile-time type checking prevents type-related vulnerabilities
+- **Dependency Management**: Using well-maintained NestJS ecosystem packages
+- **Environment Variables**: Sensitive configuration kept in environment variables
 
 Security headers set on responses:
 - `X-Content-Type-Options: nosniff`
@@ -320,21 +526,37 @@ Security headers set on responses:
 **Port already in use (EADDRINUSE)**
 
 ```bash
-# Change the port
-PORT=3001 npm start
+# Change the port via environment variable
+PORT=3001 npm run start:prod
+
+# Or update .env file
+echo "PORT=3001" >> .env
+```
+
+**TypeScript compilation errors**
+
+```bash
+# Clean the dist folder and rebuild
+rm -rf dist/
+npm run build
 ```
 
 **Module not found errors**
 
 ```bash
 # Ensure dependencies are installed
+cd src/backend
+npm install
+
+# If issues persist, clear node_modules and reinstall
+rm -rf node_modules/
 npm install
 ```
 
 **Permission denied errors**
 
 ```bash
-# Check file permissions
+# Check file permissions for scripts
 chmod +x infrastructure/scripts/*.sh
 ```
 
@@ -343,15 +565,20 @@ chmod +x infrastructure/scripts/*.sh
 For detailed debugging output:
 
 ```bash
-# Enable Node.js debug output
-NODE_DEBUG=http,net npm start
+# Enable debug logging
+LOG_LEVEL=debug npm run start:dev
+
+# Start with Node.js inspector
+npm run start:debug
+
+# Then attach your debugger (VS Code, Chrome DevTools) to port 9229
 ```
 
-For interactive debugging:
+For interactive debugging in VS Code, use the provided launch configuration or:
 
 ```bash
-# Start with inspector
-node --inspect src/backend/index.js
+# Start with inspector, waiting for debugger to attach
+node --inspect-brk dist/main.js
 ```
 
 ## Contributing
@@ -360,13 +587,38 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for de
 
 This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Code of Conduct](CODE_OF_CONDUCT.md).
 
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/my-feature`
+3. Make your changes with tests
+4. Run tests: `npm test && npm run test:e2e`
+5. Run linter: `npm run lint`
+6. Commit your changes: `git commit -m 'Add some feature'`
+7. Push to the branch: `git push origin feature/my-feature`
+8. Submit a pull request
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Resources
 
-- [Node.js Documentation](https://nodejs.org/docs/latest-v18.x/api/)
-- [Node.js HTTP Module](https://nodejs.org/docs/latest-v18.x/api/http.html)
-- [Jest Testing Framework](https://jestjs.io/docs/getting-started)
-- [Supertest Documentation](https://github.com/visionmedia/supertest#readme)
+### NestJS & TypeScript
+
+- [NestJS Documentation](https://docs.nestjs.com/) - Official NestJS documentation
+- [NestJS Fundamentals](https://docs.nestjs.com/first-steps) - Getting started guide
+- [TypeScript Documentation](https://www.typescriptlang.org/docs/) - Official TypeScript docs
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html) - TypeScript language guide
+
+### Node.js & Testing
+
+- [Node.js Documentation](https://nodejs.org/docs/latest-v18.x/api/) - Node.js API reference
+- [Jest Testing Framework](https://jestjs.io/docs/getting-started) - Jest documentation
+- [Supertest Documentation](https://github.com/visionmedia/supertest#readme) - HTTP assertions for testing
+
+### Additional Resources
+
+- [NestJS CLI Reference](https://docs.nestjs.com/cli/overview) - Command-line interface
+- [NestJS Testing](https://docs.nestjs.com/fundamentals/testing) - Testing utilities and patterns
+- [Express.js Guide](https://expressjs.com/en/guide/routing.html) - Underlying HTTP platform
