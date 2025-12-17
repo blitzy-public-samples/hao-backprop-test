@@ -1,35 +1,42 @@
 /**
- * Jest Configuration File
- * Version: 1.0.0
- * 
- * This configuration file sets up Jest testing framework for the Node.js Hello World
- * server application. It defines test patterns, coverage thresholds, and other
- * test-related settings to ensure proper test execution and reporting.
+ * @fileoverview Jest Configuration for NestJS TypeScript Application
+ * @description Configures Jest testing framework for TypeScript-based NestJS application
+ *              with ts-jest transformer, code coverage thresholds, and test file patterns.
+ * @module JestConfig
  */
 
 module.exports = {
-  // Use Node.js as the test environment since this is a Node.js application
+  // Test environment to use
   testEnvironment: 'node',
-  
-  // Files to run after Jest is loaded (setup file for global test configuration)
-  // Note: You'll need to create this file if it doesn't exist
-  setupFilesAfterEnv: ['<rootDir>/__tests__/setup.js'],
-  
-  // Patterns to match test files - looks for *.test.js files in __tests__ directories
-  testMatch: ['**/__tests__/**/*.test.js'],
-  
-  // Files to include in coverage reports - includes all JS files except tests and configs
+
+  // Module file extensions for resolving
+  moduleFileExtensions: ['js', 'json', 'ts'],
+
+  // Root directory for tests
+  rootDir: 'src',
+
+  // Pattern for test files
+  testRegex: '.*\\.spec\\.ts$',
+
+  // Transform TypeScript files with ts-jest
+  transform: {
+    '^.+\\.(t|j)s$': 'ts-jest',
+  },
+
+  // Coverage collection patterns
   collectCoverageFrom: [
-    '**/*.js',
-    '!**/__tests__/**',
+    '**/*.ts',
+    '!**/*.module.ts',
     '!**/node_modules/**',
-    '!**/coverage/**',
-    '!jest.config.js',
-    '!.eslintrc.js',
-    '!.prettierrc',
+    '!**/dist/**',
+    '!**/*.d.ts',
+    '!main.ts',
   ],
-  
-  // Minimum coverage thresholds to enforce as per specifications
+
+  // Coverage output directory
+  coverageDirectory: '../coverage',
+
+  // Coverage thresholds - maintaining existing requirements
   coverageThreshold: {
     global: {
       statements: 90,
@@ -38,22 +45,26 @@ module.exports = {
       lines: 90,
     },
   },
-  
-  // Coverage report formats: text summary in console, lcov for CI tools, and HTML for detailed reports
+
+  // Coverage reporters
   coverageReporters: ['text', 'lcov', 'html'],
-  
-  // Timeout for test cases in milliseconds (5 seconds)
+
+  // Test timeout
   testTimeout: 5000,
-  
-  // Clear mock calls and instances between tests
+
+  // Mock clearing and restoration
   clearMocks: true,
-  
-  // Reset mock state between tests
   resetMocks: true,
-  
-  // Restore mocked functions to their original implementation
   restoreMocks: true,
-  
-  // Display individual test results with the test suite hierarchy
+
+  // Verbose output
   verbose: true,
+
+  // Ignore patterns
+  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
+
+  // Module name mapper for path aliases
+  moduleNameMapper: {
+    '^src/(.*)$': '<rootDir>/$1',
+  },
 };
