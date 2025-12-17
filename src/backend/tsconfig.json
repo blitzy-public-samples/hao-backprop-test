@@ -1,31 +1,326 @@
 {
+  /**
+   * TypeScript Configuration for NestJS Hello World Application
+   * 
+   * @fileoverview This TypeScript compiler configuration is specifically designed
+   * for NestJS applications running on Node.js. It enables all the features
+   * required by NestJS's dependency injection system, decorator-based routing,
+   * and module architecture.
+   * 
+   * Configuration Sections:
+   * 1. Target and Module Settings - JavaScript output format
+   * 2. NestJS Required Settings - Decorator and metadata support
+   * 3. Strict Type Checking - Type safety enforcement
+   * 4. Module Resolution - How TypeScript finds modules
+   * 5. Output Configuration - Build artifact settings
+   * 6. Path Aliases - Import path shortcuts
+   * 7. Performance Options - Compilation speed optimizations
+   * 
+   * Compatible with:
+   * - NestJS v11.x
+   * - TypeScript v5.x
+   * - Node.js v18+
+   * 
+   * @author Blitzy Platform
+   * @version 1.0.0
+   */
   "compilerOptions": {
+    /* ========================================================================
+     * SECTION 1: TARGET AND MODULE SETTINGS
+     * These settings control the JavaScript output format and runtime target.
+     * ======================================================================== */
+    
+    /**
+     * ECMAScript target version for compiled JavaScript output.
+     * ES2021 provides modern features like logical assignment operators,
+     * String.prototype.replaceAll, and Promise.any while maintaining
+     * broad Node.js compatibility (Node 16+).
+     */
     "target": "ES2021",
+    
+    /**
+     * Module system for the compiled output.
+     * CommonJS is required for Node.js runtime compatibility.
+     * NestJS uses CommonJS modules internally for its dependency injection.
+     */
     "module": "commonjs",
+    
+    /**
+     * Library files to include in the compilation.
+     * ES2021 includes all standard built-in objects and types
+     * available in ECMAScript 2021.
+     */
     "lib": ["ES2021"],
+
+    /* ========================================================================
+     * SECTION 2: NESTJS REQUIRED SETTINGS
+     * These settings are mandatory for NestJS dependency injection and
+     * decorator-based programming model to work correctly.
+     * ======================================================================== */
+    
+    /**
+     * Enable experimental support for ES decorators.
+     * REQUIRED for NestJS: Controllers, Modules, and Services all use
+     * decorators like @Controller(), @Module(), @Injectable().
+     * Without this, NestJS decorators will not work.
+     */
     "experimentalDecorators": true,
+    
+    /**
+     * Emit design-type metadata for decorated declarations.
+     * REQUIRED for NestJS: This enables the dependency injection system
+     * to read type information at runtime. Without this, constructor
+     * injection will fail because NestJS cannot determine parameter types.
+     * 
+     * @example
+     * // This metadata allows NestJS to know HelloService type at runtime:
+     * constructor(private readonly helloService: HelloService) {}
+     */
     "emitDecoratorMetadata": true,
+
+    /* ========================================================================
+     * SECTION 3: STRICT TYPE CHECKING OPTIONS
+     * These settings enforce type safety and catch potential bugs at
+     * compile time rather than runtime.
+     * ======================================================================== */
+    
+    /**
+     * Enable all strict type-checking options.
+     * This is a shorthand that enables multiple strict flags:
+     * - strictNullChecks
+     * - strictFunctionTypes
+     * - strictBindCallApply
+     * - strictPropertyInitialization
+     * - noImplicitAny
+     * - noImplicitThis
+     * - alwaysStrict
+     */
     "strict": true,
+    
+    /**
+     * Enable strict null checks.
+     * When enabled, null and undefined are not assignable to other types
+     * unless explicitly declared. This catches null reference errors
+     * at compile time.
+     * 
+     * @example
+     * let name: string = null; // Error with strictNullChecks
+     * let name: string | null = null; // OK
+     */
     "strictNullChecks": true,
+    
+    /**
+     * Disable strict property initialization checking.
+     * Set to false for NestJS: NestJS services often use constructor
+     * injection where properties are initialized by the framework,
+     * not in the constructor body. Enabling this would cause false
+     * positive errors for injected dependencies.
+     * 
+     * @example
+     * @Injectable()
+     * export class HelloController {
+     *   // This is injected by NestJS, not initialized in constructor body
+     *   constructor(private readonly helloService: HelloService) {}
+     * }
+     */
     "strictPropertyInitialization": false,
+    
+    /**
+     * Raise error on expressions and declarations with implied 'any' type.
+     * Forces explicit typing, improving code quality and maintainability.
+     */
     "noImplicitAny": true,
+    
+    /**
+     * Report error when not all code paths return a value.
+     * Ensures functions with return types actually return on all paths.
+     */
     "noImplicitReturns": true,
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "removeComments": false,
-    "baseUrl": "./",
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
+    
+    /**
+     * Report errors on unused local variables.
+     * Disabled to allow for development flexibility - NestJS applications
+     * may have variables used only during debugging or future development.
+     */
     "noUnusedLocals": false,
-    "noUnusedParameters": false
+    
+    /**
+     * Report errors on unused parameters.
+     * Disabled because NestJS decorators may require specific parameter
+     * signatures even if not all parameters are used.
+     */
+    "noUnusedParameters": false,
+    
+    /**
+     * Ensure consistent casing in file names.
+     * Prevents issues when code runs on case-sensitive file systems
+     * (Linux) vs case-insensitive ones (macOS, Windows).
+     */
+    "forceConsistentCasingInFileNames": true,
+
+    /* ========================================================================
+     * SECTION 4: MODULE RESOLUTION OPTIONS
+     * These settings control how TypeScript finds and loads modules.
+     * ======================================================================== */
+    
+    /**
+     * Module resolution strategy.
+     * "node" mimics Node.js module resolution, looking in node_modules
+     * and following package.json "main" fields.
+     */
+    "moduleResolution": "node",
+    
+    /**
+     * Enable interoperability between CommonJS and ES Modules.
+     * Allows ES module syntax (import x from 'module') to work with
+     * CommonJS modules that use module.exports.
+     */
+    "esModuleInterop": true,
+    
+    /**
+     * Allow default imports from modules with no default export.
+     * Works with esModuleInterop to enable cleaner import syntax
+     * for CommonJS modules.
+     * 
+     * @example
+     * import express from 'express'; // Instead of: import * as express from 'express'
+     */
+    "allowSyntheticDefaultImports": true,
+    
+    /**
+     * Enable importing JSON files as modules.
+     * Useful for importing configuration files or package.json.
+     * 
+     * @example
+     * import config from './config.json';
+     */
+    "resolveJsonModule": true,
+
+    /* ========================================================================
+     * SECTION 5: OUTPUT CONFIGURATION
+     * These settings control the build output directory structure
+     * and generated artifacts.
+     * ======================================================================== */
+    
+    /**
+     * Output directory for compiled JavaScript files.
+     * All .js files will be placed in ./dist, mirroring the source structure.
+     * This is the directory that will be deployed to production.
+     */
+    "outDir": "./dist",
+    
+    /**
+     * Root directory of input files.
+     * Specifies the root folder containing TypeScript source files.
+     * Used to calculate the output directory structure.
+     */
+    "rootDir": "./src",
+    
+    /**
+     * Generate .d.ts declaration files.
+     * Creates TypeScript declaration files alongside compiled JavaScript,
+     * enabling type information for library consumers.
+     */
+    "declaration": true,
+    
+    /**
+     * Generate source maps for declaration files.
+     * Maps .d.ts files back to original .ts source for debugging
+     * and IDE navigation.
+     */
+    "declarationMap": true,
+    
+    /**
+     * Generate source map files for debugging.
+     * Creates .js.map files that map compiled JavaScript back to
+     * TypeScript source, enabling source-level debugging.
+     */
+    "sourceMap": true,
+    
+    /**
+     * Preserve comments in output JavaScript.
+     * Set to false to keep all comments (including TSDoc) in compiled output.
+     * This is explicitly enabled per user requirements to maintain
+     * comprehensive documentation in the built artifacts.
+     */
+    "removeComments": false,
+
+    /* ========================================================================
+     * SECTION 6: PATH ALIASES CONFIGURATION
+     * These settings enable import path shortcuts for cleaner imports.
+     * ======================================================================== */
+    
+    /**
+     * Base directory for resolving non-relative module names.
+     * Set to project root to enable path aliases.
+     */
+    "baseUrl": "./",
+    
+    /**
+     * Path alias mappings for cleaner imports.
+     * Enables using @src/* instead of relative paths like ../../src/*.
+     * This improves code readability and maintainability.
+     * 
+     * @example
+     * // Instead of: import { HelloService } from '../../hello/hello.service';
+     * // Use: import { HelloService } from '@src/hello/hello.service';
+     * 
+     * Note: For NestJS, you also need to configure tsconfig-paths in
+     * jest.config.js and nest-cli.json for runtime resolution.
+     */
+    "paths": {
+      "@src/*": ["src/*"]
+    },
+
+    /* ========================================================================
+     * SECTION 7: PERFORMANCE AND OPTIMIZATION OPTIONS
+     * These settings improve compilation speed and development experience.
+     * ======================================================================== */
+    
+    /**
+     * Skip type checking of declaration files in node_modules.
+     * Significantly improves compilation speed by trusting that
+     * npm packages have correct type definitions.
+     */
+    "skipLibCheck": true,
+    
+    /**
+     * Enable incremental compilation for faster subsequent builds.
+     * Stores information about the project graph from the last compilation
+     * to speed up subsequent compilations.
+     */
+    "incremental": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
+
+  /* ==========================================================================
+   * INCLUDE PATTERNS
+   * Specifies which files should be included in the compilation.
+   * 
+   * Includes:
+   * - src/**/* : All source files in the src directory
+   * - test/**/* : All test files in the test directory
+   * 
+   * This ensures both production code and tests are type-checked together,
+   * catching type mismatches between tests and implementation.
+   * ========================================================================== */
+  "include": [
+    "src/**/*",
+    "test/**/*"
+  ],
+
+  /* ==========================================================================
+   * EXCLUDE PATTERNS
+   * Specifies which files/directories should be excluded from compilation.
+   * 
+   * Excludes:
+   * - node_modules : Third-party dependencies (handled by skipLibCheck)
+   * - dist : Build output directory (avoid recompiling compiled code)
+   * 
+   * Note: Test files are NOT excluded because they share types with
+   * source files and should be type-checked in the same compilation context.
+   * ========================================================================== */
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
