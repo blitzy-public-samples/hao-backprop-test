@@ -86,7 +86,7 @@ import { INestApplication } from '@nestjs/common';
 // -----------------------------------------------------------------------------
 /**
  * supertest: HTTP testing library for making requests to the test server.
- * Uses namespace import pattern (import * as) for TypeScript compatibility.
+ * Uses default import pattern for TypeScript/ES module compatibility.
  *
  * Key methods used:
  * - request(server): Creates a request agent for the given server
@@ -100,8 +100,13 @@ import { INestApplication } from '@nestjs/common';
  * This replaces the direct URL-based requests from vanilla Node.js:
  * - Old: request(`http://localhost:${config.port}`)
  * - New: request(app.getHttpServer())
+ *
+ * Note: Default import is used instead of namespace import (* as) because
+ * the @types/supertest definitions export the main function as default.
+ * This is compatible with tsconfig settings: esModuleInterop: true and
+ * allowSyntheticDefaultImports: true.
  */
-import * as request from 'supertest';
+import request from 'supertest';
 
 // -----------------------------------------------------------------------------
 // Application Module
@@ -124,6 +129,27 @@ import * as request from 'supertest';
  * @see src/backend/src/app.module.ts
  */
 import { AppModule } from '../src/app.module';
+
+// -----------------------------------------------------------------------------
+// Exception Filters
+// -----------------------------------------------------------------------------
+/**
+ * HttpExceptionFilter: Global exception filter for HTTP-specific errors.
+ * Handles 404 Not Found and 405 Method Not Allowed with proper plain text
+ * responses and required headers (e.g., Allow header for 405 responses).
+ *
+ * AllExceptionsFilter: Catch-all filter for unhandled exceptions.
+ * Ensures all errors return consistent 500 Internal Server Error responses.
+ *
+ * IMPORTANT: These filters must be manually registered in e2e tests because
+ * the Test.createTestingModule() method doesn't call the main.ts bootstrap
+ * function where global filters are normally registered.
+ *
+ * @see src/backend/src/common/filters/http-exception.filter.ts
+ * @see src/backend/src/common/filters/all-exceptions.filter.ts
+ */
+import { HttpExceptionFilter } from '../src/common/filters/http-exception.filter';
+import { AllExceptionsFilter } from '../src/common/filters/all-exceptions.filter';
 
 /* ============================================================================
  * E2E TEST SUITE
@@ -239,9 +265,28 @@ describe('AppController (e2e)', () => {
     // This is equivalent to NestFactory.create(AppModule) in main.ts
     app = moduleFixture.createNestApplication();
 
+    // -------------------------------------------------------------------------
+    // Register Global Exception Filters
+    // -------------------------------------------------------------------------
+    // IMPORTANT: Global filters registered in main.ts via app.useGlobalFilters()
+    // are NOT automatically applied when using Test.createTestingModule().
+    // We must manually register them here to maintain the same error handling
+    // behavior as the production application.
+    //
+    // Filter registration order (LIFO - Last In, First Out):
+    // 1. AllExceptionsFilter (registered first, tried last as catch-all)
+    // 2. HttpExceptionFilter (registered second, tried first for HTTP errors)
+    //
+    // This ensures:
+    // - 404 responses have text/plain Content-Type and "Not Found" body
+    // - 405 responses have text/plain Content-Type, Allow header, and proper body
+    // - All other HTTP exceptions are handled consistently
+    // -------------------------------------------------------------------------
+    app.useGlobalFilters(new AllExceptionsFilter(), new HttpExceptionFilter());
+
     // Initialize the application - this starts the HTTP server
     // After this call, the app is ready to receive HTTP requests
-    // Note: Global filters/guards registered in AppModule will be active
+    // Note: Global filters are now registered and will be active
     await app.init();
   });
 
