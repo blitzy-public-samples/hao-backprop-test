@@ -292,33 +292,33 @@
     "incremental": true
   },
 
-  /* ==========================================================================
-   * INCLUDE PATTERNS
-   * Specifies which files should be included in the compilation.
-   * 
-   * Includes:
-   * - src/**/* : All source files in the src directory
-   * - test/**/* : All test files in the test directory
-   * 
-   * This ensures both production code and tests are type-checked together,
-   * catching type mismatches between tests and implementation.
-   * ========================================================================== */
+  // ==========================================================================
+  // INCLUDE PATTERNS
+  // Specifies which files should be included in the compilation.
+  // 
+  // Includes:
+  // - src: All source files in the src directory
+  // - test: All test files in the test directory
+  // 
+  // This ensures both production code and tests are type-checked together,
+  // catching type mismatches between tests and implementation.
+  // ==========================================================================
   "include": [
     "src/**/*",
     "test/**/*"
   ],
 
-  /* ==========================================================================
-   * EXCLUDE PATTERNS
-   * Specifies which files/directories should be excluded from compilation.
-   * 
-   * Excludes:
-   * - node_modules : Third-party dependencies (handled by skipLibCheck)
-   * - dist : Build output directory (avoid recompiling compiled code)
-   * 
-   * Note: Test files are NOT excluded because they share types with
-   * source files and should be type-checked in the same compilation context.
-   * ========================================================================== */
+  // ==========================================================================
+  // EXCLUDE PATTERNS
+  // Specifies which files/directories should be excluded from compilation.
+  // 
+  // Excludes:
+  // - node_modules : Third-party dependencies (handled by skipLibCheck)
+  // - dist : Build output directory (avoid recompiling compiled code)
+  // 
+  // Note: Test files are NOT excluded because they share types with
+  // source files and should be type-checked in the same compilation context.
+  // ==========================================================================
   "exclude": [
     "node_modules",
     "dist"
