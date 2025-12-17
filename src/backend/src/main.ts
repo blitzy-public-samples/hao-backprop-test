@@ -113,6 +113,16 @@ import { AppModule } from './app.module';
 // Exception Filters Import
 // -----------------------------------------------------------------------------
 /**
+ * HttpExceptionFilter handles HTTP-specific exceptions (404, 405, etc.)
+ * and formats them into consistent plain text responses that maintain
+ * backward compatibility with the original API contract. It handles:
+ * - 404 Not Found for unknown routes
+ * - 405 Method Not Allowed with the required Allow header
+ * - Other HTTP exceptions with appropriate status codes
+ */
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+
+/**
  * AllExceptionsFilter is the catch-all exception filter that handles
  * all unhandled exceptions in the application. It replaces the
  * handleRequestError() and handleServerError() functions from
@@ -122,6 +132,10 @@ import { AppModule } from './app.module';
  * - All exceptions are caught and logged
  * - Consistent 500 error responses for unhandled errors
  * - Sensitive error details are not exposed to clients
+ *
+ * NOTE: This filter is registered FIRST, then HttpExceptionFilter,
+ * so that HttpException instances are caught by HttpExceptionFilter
+ * (NestJS uses LIFO order - last registered filter is tried first).
  */
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
@@ -415,19 +429,27 @@ async function bootstrap(): Promise<void> {
     // -------------------------------------------------------------------------
     // Step 3: Register Global Exception Filters
     // -------------------------------------------------------------------------
-    // Register the global exception filter for centralized error handling.
+    // Register global exception filters for centralized error handling.
     // This replaces the errorHandler.js module from the original implementation.
     //
-    // The AllExceptionsFilter is a catch-all filter that:
-    // - Catches all unhandled exceptions in the application
-    // - Logs detailed error information for debugging
-    // - Returns standardized 500 Internal Server Error responses
-    // - Prevents sensitive error details from being exposed
+    // IMPORTANT: NestJS applies filters in LIFO (Last In, First Out) order.
+    // The last registered filter is tried first. Our filter chain:
     //
-    // Using app.useGlobalFilters() registers the filter globally,
-    // meaning it applies to ALL controllers and routes automatically.
+    // 1. AllExceptionsFilter (registered first, tried last):
+    //    - Catches all unhandled non-HTTP exceptions
+    //    - Logs detailed error information for debugging
+    //    - Returns standardized 500 Internal Server Error responses
+    //    - Prevents sensitive error details from being exposed
+    //
+    // 2. HttpExceptionFilter (registered second, tried first):
+    //    - Catches HTTP-specific exceptions (NotFoundException, MethodNotAllowedException)
+    //    - Returns proper 404 and 405 responses with correct headers
+    //    - Maintains API contract compatibility with original implementation
+    //
+    // Using app.useGlobalFilters() registers filters globally,
+    // meaning they apply to ALL controllers and routes automatically.
     logger.log('Registering global exception filters...');
-    app.useGlobalFilters(new AllExceptionsFilter());
+    app.useGlobalFilters(new AllExceptionsFilter(), new HttpExceptionFilter());
 
     // -------------------------------------------------------------------------
     // Step 4: Enable Shutdown Hooks

@@ -130,6 +130,18 @@
      * This ensures only source files are compiled, maintaining the
      * expected directory structure in the dist output.
      */
-    "rootDir": "./src"
+    "rootDir": "./src",
+
+    /**
+     * Disable incremental builds for production.
+     * The nest-cli.json has deleteOutDir: true which deletes the dist folder
+     * before each build. Combined with incremental: true from the base config,
+     * this causes issues because tsc thinks nothing needs to be recompiled
+     * based on the tsbuildinfo file, even though dist was deleted.
+     *
+     * Disabling incremental for production builds ensures a clean, complete
+     * build every time while keeping incremental enabled for development.
+     */
+    "incremental": false
   }
 }

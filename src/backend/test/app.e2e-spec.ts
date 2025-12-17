@@ -311,9 +311,7 @@ describe('AppController (e2e)', () => {
      * This is handled by AppController.getHealth() which delegates to AppService.
      */
     it('GET / should return 200 OK', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/')
-        .expect(200); // Verify HTTP 200 OK status
+      const response = await request(app.getHttpServer()).get('/').expect(200); // Verify HTTP 200 OK status
 
       // Response should be the health status string
       expect(response.text).toBe('OK');
@@ -360,9 +358,7 @@ describe('AppController (e2e)', () => {
      * Additional test with a different path to ensure 404 handling is consistent.
      */
     it('GET /non-existent-path should return 404 Not Found', async () => {
-      const response = await request(app.getHttpServer())
-        .get('/non-existent-path')
-        .expect(404);
+      const response = await request(app.getHttpServer()).get('/non-existent-path').expect(404);
 
       expect(response.text).toContain('Not Found');
     });
@@ -376,9 +372,7 @@ describe('AppController (e2e)', () => {
      * Unknown routes return 404 regardless of HTTP method.
      */
     it('POST /unknown should return 404 Not Found', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/unknown')
-        .expect(404);
+      const response = await request(app.getHttpServer()).post('/unknown').expect(404);
 
       expect(response.text).toContain('Not Found');
     });
