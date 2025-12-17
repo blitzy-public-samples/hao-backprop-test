@@ -52,11 +52,14 @@ jobs:
       - name: Install dependencies
         working-directory: src/backend
         run: npm ci
+      - name: Build TypeScript
+        working-directory: src/backend
+        run: npm run build
       - name: Run tests with coverage
         working-directory: src/backend
-        run: npm run test:coverage
+        run: npm run test:cov
       - name: Create source archive
-        run: tar -czf nodejs-hello-world-${{ github.event.release.tag_name }}.tar.gz --exclude=node_modules --exclude=coverage src/backend
+        run: tar -czf nodejs-hello-world-${{ github.event.release.tag_name }}.tar.gz --exclude=node_modules --exclude=coverage --exclude=*.tsbuildinfo src/backend
       - name: Upload source archive to release
         uses: actions/upload-release-asset@v1
         env:
@@ -67,7 +70,7 @@ jobs:
           asset_name: nodejs-hello-world-${{ github.event.release.tag_name }}.tar.gz
           asset_content_type: application/gzip
       - name: Generate deployment instructions
-        run: echo "# Deployment Instructions\n\n## Docker\n\n```bash\ndocker pull ghcr.io/${{ github.repository_owner }}/nodejs-hello-world:${{ github.event.release.tag_name }}\ndocker run -p 3000:3000 ghcr.io/${{ github.repository_owner }}/nodejs-hello-world:${{ github.event.release.tag_name }}\n```\n\n## Manual Installation\n\n```bash\ntar -xzf nodejs-hello-world-${{ github.event.release.tag_name }}.tar.gz\ncd src/backend\nnpm install --production\nnpm start\n```" > deployment-instructions.md
+        run: echo "# Deployment Instructions\n\n## Docker\n\n```bash\ndocker pull ghcr.io/${{ github.repository_owner }}/nodejs-hello-world:${{ github.event.release.tag_name }}\ndocker run -p 3000:3000 ghcr.io/${{ github.repository_owner }}/nodejs-hello-world:${{ github.event.release.tag_name }}\n```\n\n## Manual Installation\n\n```bash\ntar -xzf nodejs-hello-world-${{ github.event.release.tag_name }}.tar.gz\ncd src/backend\nnpm ci --omit=dev\nnpm run start:prod\n```" > deployment-instructions.md
       - name: Upload deployment instructions to release
         uses: actions/upload-release-asset@v1
         env:
