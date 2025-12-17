@@ -179,7 +179,10 @@ function createMockRequest(method: string = 'GET', url: string = '/test') {
  * const mockRequest = createMockRequest('POST', '/hello');
  * const mockHost = createMockArgumentsHost(mockResponse, mockRequest);
  */
-function createMockArgumentsHost(mockResponse: ReturnType<typeof createMockResponse>, mockRequest: ReturnType<typeof createMockRequest>) {
+function createMockArgumentsHost(
+  mockResponse: ReturnType<typeof createMockResponse>,
+  mockRequest: ReturnType<typeof createMockRequest>,
+) {
   // Create a mock that matches the ArgumentsHost interface structure
   // The filter calls host.switchToHttp() to get HTTP-specific context
   const mockHost: ArgumentsHost = {
@@ -458,9 +461,7 @@ describe('HttpExceptionFilter', () => {
       // The log should indicate a 404 response is being sent
       expect(loggerLogSpy).toHaveBeenCalled();
       // Verify the log message contains the expected text
-      expect(loggerLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('404 Not Found'),
-      );
+      expect(loggerLogSpy).toHaveBeenCalledWith(expect.stringContaining('404 Not Found'));
     });
   });
 
@@ -583,9 +584,7 @@ describe('HttpExceptionFilter', () => {
 
       // Assert: Verify logger was called with appropriate message
       expect(loggerLogSpy).toHaveBeenCalled();
-      expect(loggerLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('405 Method Not Allowed'),
-      );
+      expect(loggerLogSpy).toHaveBeenCalledWith(expect.stringContaining('405 Method Not Allowed'));
     });
 
     /**
@@ -772,12 +771,8 @@ describe('HttpExceptionFilter', () => {
       filter.catch(exception, mockHost);
 
       // Assert: Log should include request details
-      expect(loggerLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('POST'),
-      );
-      expect(loggerLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('/api/test'),
-      );
+      expect(loggerLogSpy).toHaveBeenCalledWith(expect.stringContaining('POST'));
+      expect(loggerLogSpy).toHaveBeenCalledWith(expect.stringContaining('/api/test'));
     });
   });
 

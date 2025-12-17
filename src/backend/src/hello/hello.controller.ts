@@ -65,13 +65,16 @@ import {
 import { HelloService } from './hello.service';
 
 // -----------------------------------------------------------------------------
-// Data Transfer Objects (DTOs)
+// Data Transfer Objects (DTOs) - Documentation Reference
 // -----------------------------------------------------------------------------
-// Type-safe response structure for API documentation and type annotations
-// Note: This import is optional and used for documentation purposes.
-// The controller returns a plain string for backward compatibility with
-// the original helloHandler.js implementation (res.end(MESSAGES.HELLO_RESPONSE))
-import { HelloResponseDto } from './dto/hello-response.dto';
+// Note: HelloResponseDto (./dto/hello-response.dto.ts) is available for
+// type-safe response structures and API documentation. The controller returns
+// a plain string for backward compatibility with the original helloHandler.js
+// implementation (res.end(MESSAGES.HELLO_RESPONSE)).
+//
+// For typed responses, the DTO can be imported and used as:
+// import { HelloResponseDto } from './dto/hello-response.dto';
+// @Get() getHello(): HelloResponseDto { return { message: this.helloService.getHello() }; }
 
 /* ============================================================================
  * HELLO CONTROLLER CLASS
