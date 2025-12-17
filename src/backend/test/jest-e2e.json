@@ -1,0 +1,50 @@
+{
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^@src/(.*)$": "<rootDir>/../src/$1"
+  },
+  "coverageDirectory": "../coverage/e2e",
+  "collectCoverageFrom": [
+    "../src/**/*.ts",
+    "!../src/**/*.spec.ts",
+    "!../src/**/*.module.ts",
+    "!../src/main.ts"
+  ],
+  "coverageReporters": [
+    "text",
+    "lcov",
+    "html"
+  ],
+  "coverageThreshold": {
+    "global": {
+      "statements": 80,
+      "branches": 70,
+      "functions": 80,
+      "lines": 80
+    }
+  },
+  "testTimeout": 30000,
+  "verbose": true,
+  "detectOpenHandles": true,
+  "forceExit": true,
+  "clearMocks": true,
+  "resetMocks": true,
+  "restoreMocks": true,
+  "maxWorkers": 1,
+  "setupFilesAfterEnv": [],
+  "globals": {
+    "ts-jest": {
+      "tsconfig": "<rootDir>/../tsconfig.json"
+    }
+  }
+}

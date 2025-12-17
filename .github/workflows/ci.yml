@@ -1,55 +1,343 @@
+# =============================================================================
+# CI Workflow for NestJS Hello World Application
+# =============================================================================
+# @fileoverview Continuous Integration pipeline for the NestJS application
+# @description This workflow runs on every push and pull request to the main
+#              branch, performing comprehensive validation of the codebase.
+#
+# Pipeline Jobs:
+#   1. lint        - Ensures code follows ESLint and Prettier standards
+#   2. test        - Runs Jest unit tests with coverage reporting
+#   3. typescript-build - Compiles TypeScript to verify no compilation errors
+#   4. build       - Builds the Docker image to verify containerization works
+#
+# Job Dependency Chain:
+#   lint (independent)
+#   test (independent) ──► typescript-build ──► build
+#
+# Note: The lint job runs independently since code style issues shouldn't
+# block test execution. However, TypeScript compilation must succeed before
+# Docker build to catch type errors early with clearer error messages.
+# =============================================================================
+
 name: CI
 
+# -----------------------------------------------------------------------------
+# Trigger Configuration
+# -----------------------------------------------------------------------------
+# This workflow triggers on:
+#   - Push events to the main branch (after merge)
+#   - Pull request events targeting the main branch (before merge)
+#
+# This ensures all code changes are validated both:
+#   - During PR review (catch issues before merge)
+#   - After merge to main (verify integration)
+# -----------------------------------------------------------------------------
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
+# =============================================================================
+# Jobs Definition
+# =============================================================================
 jobs:
+  # ===========================================================================
+  # Lint Job
+  # ===========================================================================
+  # Purpose: Verify code quality and style consistency
+  #
+  # This job runs ESLint with TypeScript rules and Prettier formatting checks
+  # to ensure consistent code style across the codebase. It catches:
+  #   - TypeScript type errors and best practice violations
+  #   - Unused variables and imports
+  #   - Inconsistent formatting
+  #   - NestJS-specific linting rules
+  #
+  # Runs independently (no 'needs' dependency) so style issues don't block
+  # other validation jobs.
+  # ===========================================================================
   lint:
     runs-on: ubuntu-latest
     steps:
+      # -----------------------------------------------------------------------
+      # Step 1: Checkout the repository code
+      # -----------------------------------------------------------------------
+      # Uses actions/checkout@v3 to clone the repository
+      # This provides access to all source files for linting
+      # -----------------------------------------------------------------------
       - name: Checkout code
         uses: actions/checkout@v3
+
+      # -----------------------------------------------------------------------
+      # Step 2: Set up Node.js environment
+      # -----------------------------------------------------------------------
+      # Uses actions/setup-node@v3 with:
+      #   - node-version: 18 (minimum required for NestJS 11)
+      #   - cache: 'npm' for faster dependency installation
+      #   - cache-dependency-path: Points to backend's package-lock.json
+      #
+      # The cache key is generated from package-lock.json, so dependencies
+      # are re-downloaded only when the lock file changes
+      # -----------------------------------------------------------------------
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: 'npm'
           cache-dependency-path: src/backend/package-lock.json
+
+      # -----------------------------------------------------------------------
+      # Step 3: Install dependencies
+      # -----------------------------------------------------------------------
+      # Uses 'npm ci' instead of 'npm install' for:
+      #   - Faster, more reliable installs in CI environments
+      #   - Exact version matching from package-lock.json
+      #   - Automatic removal of node_modules before install
+      # -----------------------------------------------------------------------
       - name: Install dependencies
         working-directory: src/backend
         run: npm ci
+
+      # -----------------------------------------------------------------------
+      # Step 4: Run linting checks
+      # -----------------------------------------------------------------------
+      # Executes the 'lint' script from package.json which runs:
+      #   - ESLint with @typescript-eslint rules
+      #   - Prettier formatting validation
+      #
+      # The lint script is: eslint "{src,test}/**/*.ts" --fix
+      # In CI, --fix won't actually modify files (no commit), but will
+      # report all fixable and non-fixable issues
+      # -----------------------------------------------------------------------
       - name: Run linting
         working-directory: src/backend
         run: npm run lint
 
+  # ===========================================================================
+  # Test Job
+  # ===========================================================================
+  # Purpose: Execute the Jest test suite with coverage reporting
+  #
+  # This job runs all unit tests to ensure:
+  #   - All modules function correctly in isolation
+  #   - Business logic produces expected results
+  #   - Error handling works as designed
+  #   - Code coverage meets project standards
+  #
+  # Uses NestJS's @nestjs/testing module for proper dependency injection
+  # mocking in controller and service tests.
+  #
+  # Note: Uses 'test:cov' script (NestJS CLI standard) not 'test:coverage'
+  # ===========================================================================
   test:
     runs-on: ubuntu-latest
     steps:
+      # -----------------------------------------------------------------------
+      # Step 1: Checkout the repository code
+      # -----------------------------------------------------------------------
       - name: Checkout code
         uses: actions/checkout@v3
+
+      # -----------------------------------------------------------------------
+      # Step 2: Set up Node.js environment with npm caching
+      # -----------------------------------------------------------------------
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: 'npm'
           cache-dependency-path: src/backend/package-lock.json
+
+      # -----------------------------------------------------------------------
+      # Step 3: Install dependencies using npm ci
+      # -----------------------------------------------------------------------
       - name: Install dependencies
         working-directory: src/backend
         run: npm ci
+
+      # -----------------------------------------------------------------------
+      # Step 4: Run Jest tests with coverage
+      # -----------------------------------------------------------------------
+      # Executes 'test:cov' script which runs: jest --coverage
+      #
+      # This generates coverage reports showing:
+      #   - Statement coverage percentage
+      #   - Branch coverage percentage
+      #   - Function coverage percentage
+      #   - Line coverage percentage
+      #
+      # Note: Using 'test:cov' (NestJS standard) instead of 'test:coverage'
+      # The NestJS CLI generates package.json with 'test:cov' by default
+      # -----------------------------------------------------------------------
       - name: Run tests with coverage
         working-directory: src/backend
-        run: npm run test:coverage
+        run: npm run test:cov
 
-  build:
+  # ===========================================================================
+  # TypeScript Build Job
+  # ===========================================================================
+  # Purpose: Verify TypeScript compilation succeeds before Docker build
+  #
+  # This job compiles TypeScript source code to JavaScript and verifies:
+  #   - No type errors exist in the codebase
+  #   - All imports resolve correctly
+  #   - The dist/ output folder is created with compiled files
+  #
+  # Rationale for Separate Job:
+  #   While the Docker multi-stage build also compiles TypeScript, running
+  #   compilation separately provides several benefits:
+  #     1. Faster feedback on TypeScript errors (no Docker overhead)
+  #     2. Clearer error messages (not buried in Docker build logs)
+  #     3. Validates TypeScript configuration independently
+  #     4. Ensures type safety before expensive Docker build
+  #
+  # Dependency: Requires test job to pass first to avoid compiling code
+  # that has failing tests
+  # ===========================================================================
+  typescript-build:
     runs-on: ubuntu-latest
+    # Wait for tests to pass before attempting TypeScript compilation
+    # This ensures we don't waste CI time compiling broken code
+    needs: [test]
     steps:
+      # -----------------------------------------------------------------------
+      # Step 1: Checkout the repository code
+      # -----------------------------------------------------------------------
       - name: Checkout code
         uses: actions/checkout@v3
+
+      # -----------------------------------------------------------------------
+      # Step 2: Set up Node.js environment with npm caching
+      # -----------------------------------------------------------------------
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: src/backend/package-lock.json
+
+      # -----------------------------------------------------------------------
+      # Step 3: Install dependencies using npm ci
+      # -----------------------------------------------------------------------
+      - name: Install dependencies
+        working-directory: src/backend
+        run: npm ci
+
+      # -----------------------------------------------------------------------
+      # Step 4: Compile TypeScript using NestJS build command
+      # -----------------------------------------------------------------------
+      # Executes 'build' script which runs: nest build
+      #
+      # The NestJS CLI build command:
+      #   - Reads tsconfig.build.json configuration
+      #   - Compiles all .ts files in src/ to JavaScript
+      #   - Outputs compiled files to dist/ folder
+      #   - Generates source maps for debugging
+      #
+      # If compilation fails, the job fails with clear TypeScript errors
+      # -----------------------------------------------------------------------
+      - name: Build TypeScript
+        working-directory: src/backend
+        run: npm run build
+
+      # -----------------------------------------------------------------------
+      # Step 5: Verify the compilation output exists
+      # -----------------------------------------------------------------------
+      # Confirms the dist/ folder was created with compiled JavaScript files
+      # This catches edge cases where build appears to succeed but produces
+      # no output (e.g., misconfigured tsconfig)
+      #
+      # Lists directory contents to provide visibility into build output
+      # -----------------------------------------------------------------------
+      - name: Verify dist folder exists
+        working-directory: src/backend
+        run: |
+          echo "Verifying TypeScript compilation output..."
+          ls -la dist/
+          echo "✓ TypeScript compilation successful!"
+
+  # ===========================================================================
+  # Docker Build Job
+  # ===========================================================================
+  # Purpose: Build the Docker image to verify containerization works
+  #
+  # This job builds the production Docker image using the multi-stage
+  # Dockerfile to verify:
+  #   - Dockerfile syntax is valid
+  #   - All build stages complete successfully
+  #   - The final image is created without errors
+  #
+  # Uses Docker Buildx for:
+  #   - Advanced build features (multi-platform support)
+  #   - Efficient layer caching via GitHub Actions cache
+  #   - Better build performance
+  #
+  # Note: This job does NOT push the image to a registry (push: false)
+  # It only validates that the build succeeds. Pushing happens in the
+  # release workflow.
+  #
+  # Dependency: Requires typescript-build to pass first, ensuring:
+  #   1. TypeScript compiles without errors
+  #   2. Clear error messages if compilation fails
+  #   3. Docker build only runs when code is type-safe
+  # ===========================================================================
+  build:
+    runs-on: ubuntu-latest
+    # Ensure TypeScript compiles before attempting Docker build
+    # This provides faster feedback on TypeScript errors with clearer messages
+    needs: [typescript-build]
+    steps:
+      # -----------------------------------------------------------------------
+      # Step 1: Checkout the repository code
+      # -----------------------------------------------------------------------
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # -----------------------------------------------------------------------
+      # Step 2: Set up Docker Buildx
+      # -----------------------------------------------------------------------
+      # Docker Buildx is an extended build command with additional features:
+      #   - Multi-platform builds (linux/amd64, linux/arm64)
+      #   - Advanced caching mechanisms
+      #   - Build secrets management
+      #   - SSH forwarding for private repos
+      #
+      # Uses docker/setup-buildx-action@v2 to install and configure Buildx
+      # -----------------------------------------------------------------------
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+
+      # -----------------------------------------------------------------------
+      # Step 3: Build the Docker image
+      # -----------------------------------------------------------------------
+      # Uses docker/build-push-action@v4 with the following configuration:
+      #
+      #   context: .
+      #     The build context is the repository root where Dockerfile is located
+      #     This provides access to all files needed for the build
+      #
+      #   push: false
+      #     Only build, don't push to registry (validation only)
+      #     Pushing is handled by the release workflow
+      #
+      #   tags: nodejs-hello-world:test
+      #     Local tag for the built image
+      #     Used for identification in CI logs
+      #
+      #   cache-from: type=gha
+      #     Pull cached layers from GitHub Actions cache
+      #     Speeds up builds by reusing unchanged layers
+      #
+      #   cache-to: type=gha,mode=max
+      #     Push all layers to GitHub Actions cache
+      #     mode=max caches all layers, not just final image layers
+      #
+      # The multi-stage Dockerfile:
+      #   1. Builder stage: Installs deps and compiles TypeScript
+      #   2. Production stage: Copies compiled code, runs with minimal image
+      # -----------------------------------------------------------------------
       - name: Build Docker image
         uses: docker/build-push-action@v4
         with:

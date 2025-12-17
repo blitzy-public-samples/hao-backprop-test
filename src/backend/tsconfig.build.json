@@ -1,0 +1,147 @@
+{
+  /**
+   * Production TypeScript Build Configuration for NestJS Hello World Application
+   * 
+   * @fileoverview This file extends the base tsconfig.json and provides
+   * production-specific compiler settings. It is specifically designed to
+   * exclude development and test artifacts from the production build,
+   * resulting in a smaller, optimized output suitable for deployment.
+   * 
+   * Purpose:
+   * - Exclude test files from production compilation
+   * - Exclude development dependencies and artifacts
+   * - Produce clean, production-ready JavaScript output
+   * 
+   * Usage:
+   * This configuration is automatically used by:
+   * - `nest build` command (NestJS CLI)
+   * - `npm run build` script
+   * - Production Dockerfile build stage
+   * - CI/CD pipeline build steps
+   * 
+   * The NestJS CLI automatically looks for tsconfig.build.json when
+   * running the build command, making this the primary configuration
+   * for creating production artifacts.
+   * 
+   * Build Output:
+   * Compiled files will be placed in the ./dist directory as defined
+   * in the base tsconfig.json. Only source files from ./src will be
+   * included, with all test-related files excluded.
+   * 
+   * Compatible with:
+   * - NestJS v11.x
+   * - TypeScript v5.x
+   * - Node.js v18+
+   * 
+   * @author Blitzy Platform
+   * @version 1.0.0
+   * @see tsconfig.json - Base configuration that this file extends
+   */
+
+  /**
+   * Extend the base TypeScript configuration.
+   * This inherits all compiler options from tsconfig.json, including:
+   * - Target ES version (ES2021)
+   * - Module system (CommonJS)
+   * - Strict type checking
+   * - Decorator support for NestJS
+   * - Path aliases
+   * - Source map generation
+   * 
+   * By extending the base config, we maintain consistency between
+   * development and production builds while only overriding the
+   * file inclusion/exclusion patterns.
+   */
+  "extends": "./tsconfig.json",
+
+  /**
+   * Exclude patterns for production builds.
+   * These patterns specify files and directories that should NOT be
+   * compiled during production builds. This ensures that:
+   * 1. Build artifacts are clean and minimal
+   * 2. Test code is not deployed to production
+   * 3. Development dependencies are not included
+   * 4. Build time is optimized
+   */
+  "exclude": [
+    /**
+     * node_modules - External NPM dependencies.
+     * These packages are installed separately in production and should
+     * never be compiled by TypeScript. The runtime will resolve these
+     * from the node_modules directory.
+     */
+    "node_modules",
+
+    /**
+     * test - Test directory containing all test files.
+     * This directory contains:
+     * - Unit tests (*.spec.ts)
+     * - End-to-end tests (*.e2e-spec.ts)
+     * - Test utilities and mocks
+     * - Jest configuration
+     * 
+     * Test files are only needed during development and CI/CD testing,
+     * not in production deployments.
+     */
+    "test",
+
+    /**
+     * dist - Compiled output directory.
+     * This is the build output directory itself. Excluding it prevents
+     * TypeScript from attempting to recompile already-compiled files,
+     * avoiding infinite loops and redundant processing.
+     */
+    "dist",
+
+    /**
+     * **\/*spec.ts - Unit test files (wildcard pattern).
+     * Matches any file ending with 'spec.ts' in any directory:
+     * - hello.controller.spec.ts
+     * - hello.service.spec.ts
+     * - app.controller.spec.ts
+     * 
+     * This pattern catches test files that might exist outside the
+     * main test directory (e.g., co-located with source files during
+     * development).
+     */
+    "**/*spec.ts",
+
+    /**
+     * **\/*.e2e-spec.ts - End-to-end test files (wildcard pattern).
+     * Matches any file ending with '.e2e-spec.ts' in any directory:
+     * - app.e2e-spec.ts
+     * 
+     * E2E tests are integration tests that run against the full
+     * application and are not needed in production builds.
+     */
+    "**/*.e2e-spec.ts"
+  ],
+
+  /**
+   * CompilerOptions Overrides for Production Builds
+   * 
+   * Production-specific compiler options that override the base config.
+   * These settings ensure clean, optimized production output.
+   */
+  "compilerOptions": {
+    /**
+     * Root directory for production builds.
+     * Override the base config's "./" to use "./src" for production.
+     * This ensures only source files are compiled, maintaining the
+     * expected directory structure in the dist output.
+     */
+    "rootDir": "./src",
+
+    /**
+     * Disable incremental builds for production.
+     * The nest-cli.json has deleteOutDir: true which deletes the dist folder
+     * before each build. Combined with incremental: true from the base config,
+     * this causes issues because tsc thinks nothing needs to be recompiled
+     * based on the tsbuildinfo file, even though dist was deleted.
+     *
+     * Disabling incremental for production builds ensures a clean, complete
+     * build every time while keeping incremental enabled for development.
+     */
+    "incremental": false
+  }
+}

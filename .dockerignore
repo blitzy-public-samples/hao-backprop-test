@@ -1,20 +1,69 @@
+# =============================================================================
+# Docker Build Context Exclusions for NestJS Hello World Application
+# =============================================================================
+# This file specifies patterns for files and directories that should be
+# excluded from the Docker build context. Excluding unnecessary files reduces
+# build context size, speeds up builds, and prevents sensitive data leakage.
+#
+# NOTE: TypeScript source files (.ts) are NOT excluded because they are
+# required for the multi-stage Docker build process where compilation happens
+# inside the builder container.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
 # Version Control
+# -----------------------------------------------------------------------------
+# Exclude version control system files - not needed in container
 .git
 .github
 .gitignore
 .gitattributes
 
-# Node.js specific
+# -----------------------------------------------------------------------------
+# Node.js Specific
+# -----------------------------------------------------------------------------
+# Exclude node_modules - dependencies will be installed fresh in container
+# This ensures platform-specific native modules are built correctly
 node_modules
+
+# Exclude npm debug and lock files at root level
+# Note: Backend's own package-lock.json is needed for reproducible builds
 npm-debug.log
 npm-debug.log.*
+package-lock.json
 
-# Environment and configuration
+# -----------------------------------------------------------------------------
+# TypeScript Build Artifacts
+# -----------------------------------------------------------------------------
+# Exclude compiled output directory - build happens inside Docker multi-stage
+# This ensures fresh compilation with container's Node.js version
+dist
+
+# Exclude TypeScript incremental build info files
+# These are machine-specific and should be regenerated in container
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# -----------------------------------------------------------------------------
+# NestJS Specific
+# -----------------------------------------------------------------------------
+# Exclude NestJS CLI configuration - may contain local paths
+# Container will use default NestJS build behavior
+nest-cli.json
+
+# -----------------------------------------------------------------------------
+# Environment and Configuration
+# -----------------------------------------------------------------------------
+# CRITICAL: Exclude all environment files to prevent secret leakage
+# Environment variables should be passed to container at runtime
 .env
 .env.*
 *.env
 
+# -----------------------------------------------------------------------------
 # Documentation
+# -----------------------------------------------------------------------------
+# Exclude documentation files - not needed for runtime
 README.md
 CHANGELOG.md
 CONTRIBUTING.md
@@ -22,29 +71,64 @@ CODE_OF_CONDUCT.md
 LICENSE
 *.md
 
-# Development and testing
+# -----------------------------------------------------------------------------
+# Development and Testing
+# -----------------------------------------------------------------------------
+# Exclude test directories and files - not needed in production container
+# JavaScript test files (legacy pattern)
 **/__tests__
 **/*.test.js
+
+# TypeScript/NestJS test files
+**/*.spec.ts
+**/*.e2e-spec.ts
+test/
+
+# Test configuration files
 jest.config.js
+jest-e2e.json
+
+# Linting and formatting configuration - only needed for development
 .eslintrc.js
 .prettierrc
+
+# Test coverage reports
 coverage
+
+# Development tools configuration
 nodemon.json
 
+# -----------------------------------------------------------------------------
 # Infrastructure
+# -----------------------------------------------------------------------------
+# Exclude infrastructure files - used for deployment orchestration, not runtime
 infrastructure
 docker-compose.yml
 .dockerignore
 
-# Logs and temporary files
+# -----------------------------------------------------------------------------
+# Logs and Temporary Files
+# -----------------------------------------------------------------------------
+# Exclude logs - container should generate its own logs
 logs
 *.log
+
+# Exclude temporary directories
 tmp
 temp
 
-# IDE and editor
+# -----------------------------------------------------------------------------
+# IDE and Editor
+# -----------------------------------------------------------------------------
+# Exclude IDE-specific files and directories
 .vscode
 .idea
 *.swp
 *.swo
 .DS_Store
+
+# -----------------------------------------------------------------------------
+# Blitzy Platform
+# -----------------------------------------------------------------------------
+# Exclude Blitzy configuration folder - platform-specific, not needed in container
+blitzy/
