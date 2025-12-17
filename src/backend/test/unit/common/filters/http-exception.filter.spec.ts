@@ -193,6 +193,10 @@ function createMockArgumentsHost(mockResponse: ReturnType<typeof createMockRespo
       // getResponse() returns the Express Response object
       // Used by filter to send the formatted error response
       getResponse: () => mockResponse,
+
+      // getNext() returns the next function (used in Express middleware)
+      // Not used by exception filters but required by HttpArgumentsHost interface
+      getNext: () => jest.fn(),
     }),
 
     // These methods are part of ArgumentsHost interface but not used by our filter
@@ -206,7 +210,7 @@ function createMockArgumentsHost(mockResponse: ReturnType<typeof createMockRespo
     switchToWs: () => ({
       getClient: () => undefined,
       getData: () => undefined,
-      getPattern: () => undefined,
+      getPattern: () => '' as string,
     }),
     getType: () => 'http',
   } as ArgumentsHost;
